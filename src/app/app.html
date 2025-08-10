@@ -15,13 +15,14 @@
   <button style="margin-top: 20px" (click)="calculate()">Calculate</button>
 
   <div class="results" *ngIf="isShow && totalIncome > 0">
-    <p>Total Income With Festival Bonus: <span class="value">{{ formatIndianNumber(totalIncome) }}</span></p>
+    <p>Total Income With Festival: <span class="value">{{ formatIndianNumber(totalIncome) }}</span></p>
     <p>Exempted: <span class="value">{{ formatIndianNumber(totalIncome - totalIncomeAfterExemption) }}</span></p>
     <p>Total Income After Exemption: <span class="value">{{ formatIndianNumber(totalIncomeAfterExemption) }}</span></p>
     <p>Tax Free Limit: <span class="value">{{ formatIndianNumber(taxFreeLimit) }}</span></p>
     <p>Total Tax: <span class="value">{{ formatIndianNumber(totalTax) }}</span></p>
     <p>Tax After Max Rebate: <span class="value">{{ formatIndianNumber(minTax) }}</span></p>
     <p>Monthly TDS: <span class="value">{{ formatIndianNumber(monthlyTDS) }}</span></p>
+    <p>Monthly Salary After TDS: <span class="value">{{ formatIndianNumber(monthlyTDS) }}</span></p>
   </div>
 
   <div class="credit">
