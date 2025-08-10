@@ -32,7 +32,11 @@ export class App {
 
     const tax = this.slab_2024_2025(incomeAfterExemption, this.taxFreeLimit);
     let maxRebate = incomeAfterExemption * 0.03;
-    if (maxRebate > tax) {
+    if(tax == 0){
+      maxRebate = 0;
+      minTax = 0;
+    }
+    else if (maxRebate > tax) {
       maxRebate = 0;
       minTax = 5000;
     } else {
