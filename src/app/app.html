@@ -22,7 +22,7 @@
     <p>Total Tax: <span class="value">{{ formatIndianNumber(totalTax) }}</span></p>
     <p>Tax After Max Rebate: <span class="value">{{ formatIndianNumber(minTax) }}</span></p>
     <p>Monthly TDS: <span class="value">{{ formatIndianNumber(monthlyTDS) }}</span></p>
-    <p>Monthly Salary After TDS: <span class="value">{{ formatIndianNumber(monthlyTDS) }}</span></p>
+    <p>Monthly Salary After TDS: <span class="value">{{ formatIndianNumber(monthlySalary - monthlyTDS) }}</span></p>
   </div>
 
   <div class="credit">
