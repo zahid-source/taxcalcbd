@@ -21,10 +21,11 @@ label {
   color: #444;
 }
 
-input {
+input, p-inputnumber {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
+  background-color: white;
   border-radius: 5px;
   border: 1px solid #ccc;
   box-sizing: border-box;
@@ -78,3 +79,20 @@ button:hover {
   font-size: 16px;
   color: #007bff;
 }
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.results-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.results-table td.value {
+  text-align: right;
+  font-weight: bold;
+}
+
+

@@ -2,28 +2,62 @@
   <h2>Tax Calculator (2026-2027)</h2>
 
   <label>Monthly Salary</label>
-  <input type="number" [(ngModel)]="monthlySalary" (keyup)="isShow = false" placeholder="Enter monthly salary">
+  <p-inputnumber inputId="integeronly" [(ngModel)]="monthlySalary" (keyup)="isShow = false;calcFestival()" placeholder="Enter monthly salary" locale="en-IN"></p-inputnumber>
+
+  <label>Total Bonus</label>
+  <p-inputnumber inputId="integeronly" [(ngModel)]="festivalBonus" (keyup)="isShow = false" placeholder="Enter festival salary" locale="en-IN"></p-inputnumber>
 
   <label>Tax Free Limit</label>
-  <input type="number" [(ngModel)]="taxFreeLimit" (keyup)="isShow = false" placeholder="Enter tax-free limit">
+  <p-inputnumber inputId="integeronly" type="number" [(ngModel)]="taxFreeLimit" (keyup)="isShow = false"
+                 placeholder="Enter tax-free limit" locale="en-IN"></p-inputnumber>
+
 
   <div class="results">
     <p>Tax free limit Male: <span class="value">3,75,000</span></p>
     <p>Tax free limit Female: <span class="value">4,25,000</span></p>
+    <p>Tax free limit third gender/disability: <span class="value">5,00,000</span></p>
+    <p>Tax free limit fredom fighter: <span class="value">5,25,000</span></p>
   </div>
 
   <button style="margin-top: 20px" (click)="calculate()">Calculate</button>
 
-  <div class="results" *ngIf="isShow && totalIncome > 0">
-    <p>Total Income With Festival: <span class="value">{{ formatIndianNumber(totalIncome) }}</span></p>
-    <p>Exempted: <span class="value">{{ formatIndianNumber(totalIncome - totalIncomeAfterExemption) }}</span></p>
-    <p>Total Income After Exemption: <span class="value">{{ formatIndianNumber(totalIncomeAfterExemption) }}</span></p>
-    <p>Tax Free Limit: <span class="value">{{ formatIndianNumber(taxFreeLimit) }}</span></p>
-    <p>Total Tax: <span class="value">{{ formatIndianNumber(totalTax) }}</span></p>
-    <p>Tax After Max Rebate: <span class="value">{{ formatIndianNumber(minTax) }}</span></p>
-    <p>Monthly TDS: <span class="value">{{ formatIndianNumber(monthlyTDS) }}</span></p>
-    <p>Monthly Salary After TDS: <span class="value">{{ formatIndianNumber(monthlySalary - monthlyTDS) }}</span></p>
-  </div>
+  <table *ngIf="isShow && totalIncome > 0" class="results-table">
+    <tbody>
+    <tr>
+      <td>Total Income With Festival</td>
+      <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
+    </tr>
+    <tr>
+      <td>Exempted</td>
+      <td class="value">{{ formatIndianNumber(totalIncome - totalIncomeAfterExemption) }}</td>
+    </tr>
+    <tr>
+      <td>Total Income After Exemption</td>
+      <td class="value">{{ formatIndianNumber(totalIncomeAfterExemption) }}</td>
+    </tr>
+    <tr>
+      <td>Tax Free Limit</td>
+      <td class="value">{{ formatIndianNumber(taxFreeLimit) }}</td>
+    </tr>
+    <tr>
+      <td>Total Tax</td>
+      <td class="value">{{ formatIndianNumber(totalTax) }}</td>
+    </tr>
+    <tr>
+      <td>Tax After Max Rebate</td>
+      <td class="value">{{ formatIndianNumber(minTax) }}</td>
+    </tr>
+    <tr>
+      <td>Monthly TDS</td>
+      <td class="value">{{ formatIndianNumber(monthlyTDS) }}</td>
+    </tr>
+    <tr>
+      <td>Monthly Salary After TDS</td>
+      <td class="value">{{ formatIndianNumber(monthlySalary - monthlyTDS) }}</td>
+    </tr>
+    </tbody>
+  </table>
+
 
   <div class="credit">
     <span class="copyright-icon">©</span> Zahid Hassan

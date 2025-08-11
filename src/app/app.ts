@@ -1,17 +1,25 @@
 import {Component, signal} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {NgIf} from '@angular/common';
+import {InputNumber} from 'primeng/inputnumber';
+import {Select} from 'primeng/select';
+
+const MIN_TAX = 5000;
+const MIN_TAX_FIRST_RETURN = 1000;
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, FormsModule, NgIf],
+  imports: [FormsModule, NgIf, InputNumber, Select],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
+
+
 export class App {
   protected readonly title = signal('tax-calculator');
   monthlySalary = 0;
+  festivalBonus = 0;
   taxFreeLimit = 375000;
 
   totalIncome = 0;
@@ -20,25 +28,31 @@ export class App {
   minTax = 0;
   monthlyTDS = 0;
   isShow = false;
+  taxFreeLimitOptions = [
+    { label: '2,50,000', value: 250000 },
+    { label: '3,00,000', value: 300000 },
+    { label: '5,00,000', value: 500000 }
+  ];
+
 
   calculate() {
     this.isShow = true;
-    const gross = this.monthlySalary * 13.2;
+    const gross = this.monthlySalary * 12 + this.festivalBonus;
     let exemption = gross / 3.0;
     if (exemption > 500000) exemption = 500000;
 
     const incomeAfterExemption = gross - exemption;
     let minTax = 0;
 
-    const tax = this.slab_2024_2025(incomeAfterExemption, this.taxFreeLimit);
+    let tax = this.slab26_27(incomeAfterExemption, this.taxFreeLimit);
     let maxRebate = incomeAfterExemption * 0.03;
-    if(tax == 0){
+    if (tax == 0) {
       maxRebate = 0;
       minTax = 0;
-    }
-    else if (maxRebate > tax) {
+    } else if (maxRebate > tax) {
       maxRebate = 0;
-      minTax = 5000;
+      minTax = MIN_TAX;
+      tax = MIN_TAX;
     } else {
       minTax = tax - maxRebate;
     }
@@ -51,7 +65,7 @@ export class App {
     this.monthlyTDS = minTax / 12;
   }
 
-  slab_2024_2025(incomeAmount: number, taxFreeLimit: number): number {
+  slab26_27(incomeAmount: number, taxFreeLimit: number): number {
     const taxableAmount = incomeAmount - taxFreeLimit;
     if (taxableAmount <= 0) return 0;
 
@@ -75,5 +89,9 @@ export class App {
     let rest = amt.slice(0, -3);
     rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
     return rest + ',' + last3;
+  }
+
+  calcFestival() {
+    this.festivalBonus = this.monthlySalary * 1.2;
   }
 }
