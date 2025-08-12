@@ -81,6 +81,7 @@ button:hover {
 }
 .results-table {
   width: 100%;
+  font-size: 14px;
   border-collapse: collapse;
   margin-top: 10px;
 }
