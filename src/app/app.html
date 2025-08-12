@@ -31,35 +31,35 @@
   <table *ngIf="isShow && totalIncome > 0" class="results-table">
     <tbody>
     <tr>
-      <td>Total Income With Bonus</td>
+      <td>a. Total Income With Bonus</td>
       <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
     </tr>
     <tr>
-      <td>Exemption 1/3 (max: 5,00,000)</td>
+      <td>b. Exemption 1/3 (max: 5,00,000)</td>
       <td class="value">{{ formatIndianNumber(totalIncome - totalIncomeAfterExemption) }}</td>
     </tr>
     <tr>
-      <td>Total Income After Exemption</td>
+      <td>c. Total Income After Exemption (a-b)</td>
       <td class="value">{{ formatIndianNumber(totalIncomeAfterExemption) }}</td>
     </tr>
     <tr>
-      <td>Tax Free Limit</td>
+      <td>d. Tax Free Limit</td>
       <td class="value">{{ formatIndianNumber(taxFreeLimit) }}</td>
     </tr>
     <tr>
-      <td>Tax Without Rebate</td>
+      <td>e. Tax Without Rebate</td>
       <td class="value">{{ formatIndianNumber(totalTax) }}</td>
     </tr>
     <tr>
-      <td>Tax After Maximum Rebate</td>
+      <td>f. Tax After Max Rebate</td>
       <td class="value">{{ formatIndianNumber(taxAfterRebate) }}</td>
     </tr>
     <tr>
-      <td>Monthly TDS</td>
+      <td>g. Monthly TDS (f/12)</td>
       <td class="value">{{ formatIndianNumber(monthlyTDS) }}</td>
     </tr>
     <tr>
-      <td>Monthly Salary After TDS</td>
+      <td>h. Monthly Salary After TDS</td>
       <td class="value">{{ formatIndianNumber(monthlySalary - monthlyTDS) }}</td>
     </tr>
     </tbody>

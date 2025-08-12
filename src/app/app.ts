@@ -70,7 +70,10 @@ export class App {
   }
 
   slab26_27(incomeAmount: number, taxFreeLimit: number): number {
+    console.log(incomeAmount);
+    console.log(taxFreeLimit);
     const taxableAmount = incomeAmount - taxFreeLimit;
+    console.log(taxableAmount);
     if (taxableAmount <= 0) return 0;
 
     if (taxableAmount > 3200000) {
