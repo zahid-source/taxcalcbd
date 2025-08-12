@@ -26,7 +26,7 @@
   }
 
   @if (calcInput === CALC_INPUT.TOTAL_INCOME) {
-    <label>Total Income (yearly)</label>
+    <label>Total Income With Bonus (yearly)</label>
     <p-inputnumber inputId="integeronly" [(ngModel)]="totalIncome" (keyup)="isShow = false;"
                    placeholder="Enter total income" locale="en-IN"></p-inputnumber>
   }
