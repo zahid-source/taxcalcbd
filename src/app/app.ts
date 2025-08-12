@@ -1,16 +1,13 @@
 import {Component, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {NgIf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {InputNumber} from 'primeng/inputnumber';
-import {Select} from 'primeng/select';
 
-const MIN_TAX = 5000;
-const MIN_TAX_FIRST_RETURN = 1000;
 
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule, NgIf, InputNumber, Select],
+  imports: [FormsModule, NgIf, InputNumber, NgForOf],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -25,13 +22,20 @@ export class App {
   totalIncome = 0;
   totalIncomeAfterExemption = 0;
   totalTax = 0;
-  minTax = 0;
+  taxAfterRebate = 0;
+  minTax = 5000;
   monthlyTDS = 0;
   isShow = false;
   taxFreeLimitOptions = [
-    { label: '2,50,000', value: 250000 },
-    { label: '3,00,000', value: 300000 },
-    { label: '5,00,000', value: 500000 }
+    {label: '3,75,000 (Male)', value: 375000},
+    {label: '4,25,000 (Female)', value: 425000},
+    {label: '5,00,000 (Person with Disability /Third Gender)', value: 500000},
+    {label: '5,25,000 (Freedom Fighter)', value: 525000}
+  ];
+
+  minTaxOptions = [
+    {label: '5,000 (Has Previous Submission)', value: 5000},
+    {label: '1,000 (First Submission)', value: 1000},
   ];
 
 
@@ -42,27 +46,27 @@ export class App {
     if (exemption > 500000) exemption = 500000;
 
     const incomeAfterExemption = gross - exemption;
-    let minTax = 0;
+    let taxAfterRebate: number;
 
     let tax = this.slab26_27(incomeAfterExemption, this.taxFreeLimit);
     let maxRebate = incomeAfterExemption * 0.03;
-    if (tax == 0) {
-      maxRebate = 0;
-      minTax = 0;
-    } else if (maxRebate > tax) {
-      maxRebate = 0;
-      minTax = MIN_TAX;
-      tax = MIN_TAX;
+    taxAfterRebate = tax - maxRebate;
+    if (tax <= 0) {
+      taxAfterRebate = 0;
+      tax = 0;
+    } else if (taxAfterRebate <= this.minTax) {
+      taxAfterRebate = this.minTax;
+      tax = this.minTax;
     } else {
-      minTax = tax - maxRebate;
+      taxAfterRebate = tax - maxRebate;
     }
 
 
     this.totalIncome = gross;
     this.totalIncomeAfterExemption = incomeAfterExemption;
     this.totalTax = tax;
-    this.minTax = minTax;
-    this.monthlyTDS = minTax / 12;
+    this.taxAfterRebate = taxAfterRebate;
+    this.monthlyTDS = taxAfterRebate / 12;
   }
 
   slab26_27(incomeAmount: number, taxFreeLimit: number): number {

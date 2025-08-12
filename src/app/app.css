@@ -4,7 +4,7 @@
   padding: 20px;
   background: #f9fafb;
   border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
   font-family: Arial, sans-serif;
 }
 
@@ -96,3 +96,29 @@ button:hover {
 }
 
 
+select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #333;
+  appearance: none; /* removes default OS arrow styling */
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23333' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #3f51b5;
+  box-shadow: 0 0 3px rgba(63, 81, 181, 0.5);
+}
+
+option {
+  padding: 8px;
+}
