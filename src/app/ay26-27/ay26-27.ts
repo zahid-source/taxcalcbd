@@ -2,6 +2,10 @@ import {Component} from '@angular/core';
 import {InputNumber} from "primeng/inputnumber";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
+const EXEMPTION_RATE = 1 / 3;
+const MAX_EXEMPTION = 500_000;
+const REBATE_RATE = 0.03;
+
 @Component({
   selector: 'app-ay26-27',
   imports: [
@@ -34,14 +38,19 @@ export class Ay2627 {
     {label: '5,000 (Has Previous Submission)', value: 5000},
   ];
 
+  isShow = false;
+
+  //user-input-dropdown
   taxFreeLimit = 375000;
   calcInput = this.CALC_INPUT.MONTHLY_SALARY;
   minTax = 5000;
-  isShow = false;
 
+
+  //user-input
   monthlySalary = 0;
   festivalBonus = 0;
   totalIncome = 0;
+
   totalIncomeAfterExemption = 0;
   totalTax = 0;
   taxAfterRebate = 0;
@@ -63,15 +72,13 @@ export class Ay2627 {
     }
 
     // Step 2: Apply exemption (max cap: 500,000)
-    const EXEMPTION_RATE = 1 / 3;
-    const MAX_EXEMPTION = 500_000;
     this.exemption = Math.min(this.totalIncome * EXEMPTION_RATE, MAX_EXEMPTION);
 
     // Step 3: Calculate taxable income
     this.totalIncomeAfterExemption = this.totalIncome - this.exemption;
 
     // Step 4: Calculate rebate
-    const REBATE_RATE = 0.03;
+
     this.maxRebate = this.totalIncomeAfterExemption * REBATE_RATE;
 
     // Step 5: Calculate total tax before rebate
