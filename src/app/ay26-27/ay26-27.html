@@ -1,0 +1,107 @@
+<div class="container">
+  <div class="header-container">
+    <h3>Tax Calculator (Private Company)</h3>
+    <h4>Assessment Year: <b>2026-2027</b></h4>
+    <h4>Income Year: <b>01-07-25 to 30-06-26</b></h4>
+  </div>
+
+  <label>Calculation Input</label>
+  <select [(ngModel)]="calcInput" (change)="isShow = false">
+    @for (input of calcInputOptions; track input.value) {
+      <option [value]="input.value">{{ input.label }}</option>
+    }
+  </select>
+
+
+
+  @if (calcInput === CALC_INPUT.MONTHLY_SALARY) {
+    <label>Monthly Salary</label>
+    <p-inputnumber inputId="integeronly" [(ngModel)]="monthlySalary" (keyup)="isShow = false;calcFestival()"
+                   placeholder="Enter monthly salary" locale="en-IN"></p-inputnumber>
+
+    <label>Total Bonus</label>
+    <p-inputnumber inputId="integeronly" [(ngModel)]="festivalBonus" (keyup)="isShow = false"
+                   placeholder="Enter festival salary" locale="en-IN"></p-inputnumber>
+
+  }
+
+  @if (calcInput === CALC_INPUT.TOTAL_INCOME) {
+    <label>Total Income (yearly)</label>
+    <p-inputnumber inputId="integeronly" [(ngModel)]="totalIncome" (keyup)="isShow = false;"
+                   placeholder="Enter total income" locale="en-IN"></p-inputnumber>
+  }
+
+  <label>Tax Free Limit</label>
+  <select [(ngModel)]="taxFreeLimit" (change)="isShow = false">
+    @for (input of taxFreeLimitOptions; track input.value) {
+      <option [value]="input.value">
+        {{ input.label }}
+      </option>
+    }
+  </select>
+
+  <label>Minimum Tax</label>
+  <select [(ngModel)]="minTax" (change)="isShow = false">
+    @for (input of minTaxOptions; track input.value) {
+      <option [value]="input.value">
+        {{ input.label }}
+      </option>
+    }
+  </select>
+
+
+  <button type="submit" style="margin-top: 20px" (click)="calculate()">Calculate</button>
+
+  @if (isShow && totalIncome > 0) {
+    <table class="results-table">
+      <tbody>
+      <tr>
+        <td>a. Total Income With Bonus</td>
+        <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
+      </tr>
+      <tr>
+        <td>b. Exemption 1/3 (max: 5,00,000)</td>
+        <td class="value">{{ formatIndianNumber(exemption) }}</td>
+      </tr>
+      <tr>
+        <td>c. Total Income After Exemption (a-b)</td>
+        <td class="value">{{ formatIndianNumber(totalIncomeAfterExemption) }}</td>
+      </tr>
+      <tr>
+        <td>d. Tax Free Limit</td>
+        <td class="value">{{ formatIndianNumber(taxFreeLimit) }}</td>
+      </tr>
+
+      <tr>
+        <td>e. Tax Without Rebate</td>
+        <td class="value">{{ formatIndianNumber(totalTax) }}</td>
+      </tr>
+      <tr>
+        <td>f. Max Rebate (3% of c)</td>
+        <td class="value">{{ formatIndianNumber(maxRebate) }}</td>
+      </tr>
+      <tr>
+        <td>g. Tax After Max Rebate (e-f)</td>
+        <td class="value">{{ formatIndianNumber(taxAfterRebate) }}</td>
+      </tr>
+
+        @if (calcInput === CALC_INPUT.MONTHLY_SALARY) {
+          <tr>
+            <td>h. Monthly TDS (g/12)</td>
+            <td class="value">{{ formatIndianNumber(monthlyTDS) }}</td>
+          </tr>
+          <tr>
+            <td>i. Monthly Salary After TDS</td>
+            <td class="value">{{ formatIndianNumber(monthlySalary - monthlyTDS) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+
+  <div class="credit">
+    <span class="copyright-icon">©</span> Zahid Hassan
+  </div>
+
+</div>
