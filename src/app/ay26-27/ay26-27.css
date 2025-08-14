@@ -151,3 +151,7 @@ option {
   color: #777;
   font-style: italic;
 }
+.credit a {
+  text-decoration: underline;
+  color: inherit; /* keeps your text color */
+}
