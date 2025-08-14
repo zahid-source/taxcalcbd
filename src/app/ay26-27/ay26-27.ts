@@ -25,7 +25,7 @@ export class Ay2627 {
   }
   taxFreeLimitOptions = [
     {label: '3,75,000 (Male)', value: 375000},
-    {label: '4,25,000 (Female)', value: 425000},
+    {label: '4,25,000 (Female/65+ Age)', value: 425000},
     {label: '5,00,000 (Person with Disability /Third Gender)', value: 500000},
     {label: '5,25,000 (Freedom Fighter)', value: 525000}
   ];
