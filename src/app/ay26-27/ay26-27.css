@@ -90,6 +90,9 @@ button:hover {
   padding: 6px 10px;
   border-bottom: 1px solid #ddd;
 }
+.results-table td i {
+  color: #0ea8d5;
+}
 
 .results-table td.value {
   text-align: right;

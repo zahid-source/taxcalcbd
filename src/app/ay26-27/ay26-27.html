@@ -60,29 +60,29 @@
         <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
       </tr>
       <tr>
-        <td>b. Exemption 1/3 (max: 5,00,000)</td>
+        <td>b. Exemption <i>(1/3 of a) max: 5 lakh</i></td>
         <td class="value">{{ formatIndianNumber(exemption) }}</td>
       </tr>
       <tr>
-        <td>c. Total Income After Exemption (a-b)</td>
+        <td>c. Total Income After Exemption <i>(a-b)</i></td>
         <td class="value">{{ formatIndianNumber(totalIncomeAfterExemption) }}</td>
       </tr>
       <tr>
-        <td>d. Tax Without Rebate (slab of c)</td>
+        <td>d. Tax Without Rebate <i>(slab of c)</i></td>
         <td class="value">{{ formatIndianNumber(totalTax) }}</td>
       </tr>
       <tr>
-        <td>e. Max Rebate (3% of c)</td>
+        <td>e. Max Rebate <i>(3% of c) max: 10 lakh</i></td>
         <td class="value">{{ formatIndianNumber(maxRebate) }}</td>
       </tr>
       <tr>
-        <td>f. Tax After Max Rebate (d-e)</td>
+        <td>f. Tax After Max Rebate <i>(d-e)</i></td>
         <td class="value">{{ formatIndianNumber(taxAfterRebate) }}</td>
       </tr>
 
         @if (calcInput === CALC_INPUT.MONTHLY_SALARY) {
           <tr>
-            <td>g. Monthly TDS (f/12)</td>
+            <td>g. Monthly TDS <i>(f/12)</i></td>
             <td class="value">{{ formatIndianNumber(monthlyTDS) }}</td>
           </tr>
           <tr>
