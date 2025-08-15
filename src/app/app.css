@@ -1,0 +1,86 @@
+.container {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  font-family: Arial, sans-serif;
+}
+
+.credit {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+.copyright-icon {
+  font-weight: bold;
+  font-size: 16px;
+  color: #007bff;
+}
+.header-container {
+  text-align: center;
+  margin-bottom: 15px;   /* Reduced bottom space */
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.header-container h2 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.8rem;
+  line-height: 1.2;
+}
+
+.header-container h3 {
+  margin: 4px 0 2px 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.header-container h4 {
+  margin: 0;
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: #777;
+  font-style: italic;
+}
+.credit a {
+  text-decoration: underline;
+  color: inherit; /* keeps your text color */
+}
+
+
+select {
+  padding: 5px;
+  padding-right: 35px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  appearance: none; /* removes default OS arrow styling */
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23333' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #3f51b5;
+  box-shadow: 0 0 3px rgba(63, 81, 181, 0.5);
+}
+
+option {
+  padding: 8px;
+}

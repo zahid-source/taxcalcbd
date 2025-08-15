@@ -1,1 +1,34 @@
-<app-ay26-27></app-ay26-27>
+<div class="container">
+  <div class="header-container">
+    <h3>Tax Calculator (Private Company)</h3>
+    <h4>Assessment Year:
+      <select [(ngModel)]="ay" (change)="onAyChange()">
+        @for (input of ayOptions; track input.value) {
+          <option [value]="input.value">{{ input.label }}</option>
+        }
+      </select>
+    </h4>
+    @if(ay==1){
+      <h4>Income Year: <b>01-07-24 to 30-06-25</b></h4>
+    } @else if (ay ==2){
+      <h4>Income Year: <b>01-07-25 to 30-06-26</b></h4>
+    }
+
+  </div>
+
+  @if (ay == 1) {
+    <app-ay25-26></app-ay25-26>
+  } @else if (ay == 2) {
+    <app-ay26-27></app-ay26-27>
+  }
+
+
+  <div class="credit">
+    <span class="copyright-icon">©</span>
+    <a href="https://www.linkedin.com/in/zahid-hassan-2342a2217/" target="_blank">Zahid Hassan</a>
+  </div>
+
+</div>
+
+
+
