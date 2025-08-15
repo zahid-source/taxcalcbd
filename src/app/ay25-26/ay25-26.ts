@@ -46,7 +46,7 @@ export class Ay2526 {
 
   //user-input-dropdown
   taxFreeLimit = 350000;
-  calcInput = this.CALC_INPUT.MONTHLY_SALARY;
+  calcInput = this.CALC_INPUT.TOTAL_INCOME;
   minTax = 5000;
 
 
