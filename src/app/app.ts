@@ -1,7 +1,7 @@
 import {Component, signal} from '@angular/core';
-import {Ay2627} from './ay26-27/ay26-27';
+import {Ay2627} from './components/ay26-27/ay26-27';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Ay2526} from './ay25-26/ay25-26';
+import {Ay2526} from './components/ay25-26/ay25-26';
 
 
 @Component({

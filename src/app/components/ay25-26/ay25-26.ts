@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import {InputNumber} from "primeng/inputnumber";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {TaxCalcService} from '../../services/tax-calc-service';
 
 
 const EXEMPTION_RATE = 1 / 3;
 const MAX_EXEMPTION = 500_000;
 const REBATE_RATE = 0.03;
-
 const MAX_REBATE = 10_00_000;
 
 @Component({
@@ -55,13 +55,7 @@ export class Ay2526 {
   festivalBonus = 0;
   totalIncome = 0;
 
-  totalIncomeAfterExemption = 0;
-  totalTax = 0;
-  taxAfterRebate = 0;
-  monthlyTDS = 0;
-  maxRebate = 0;
-  exemption = 0;
-
+  taxResult!: TaxResult;
 
 
   calculate() {
@@ -74,62 +68,29 @@ export class Ay2526 {
       this.monthlySalary = 0;
       this.festivalBonus = 0;
     }
+    this.taxResult = TaxCalcService.calculateTax({
+      totalIncome: this.totalIncome,
+      taxFreeLimit: this.taxFreeLimit,
+      minTax: this.minTax,
+      slabs: [
+        { limit: 100000, rate: 5 },
+        { limit: 400000, rate: 10 },
+        { limit: 500000, rate: 15 },
+        { limit: 500000, rate: 20 },
+        { limit: 2000000, rate: 25 },
+        { limit: Infinity, rate: 30 }// last slab = no limit
+      ],
+      EXEMPTION_RATE: EXEMPTION_RATE,
+      MAX_EXEMPTION: MAX_EXEMPTION,
+      REBATE_RATE: REBATE_RATE,
+      MAX_REBATE: MAX_REBATE,
+    });
 
-    // Step 2: Apply exemption (max cap: 500,000)
-    this.exemption = Math.min(this.totalIncome * EXEMPTION_RATE, MAX_EXEMPTION);
+    console.log(this.taxResult);
 
-    // Step 3: Calculate taxable income
-    this.totalIncomeAfterExemption = this.totalIncome - this.exemption;
-
-    // Step 4: Calculate rebate
-
-    this.maxRebate = this.totalIncomeAfterExemption * REBATE_RATE;
-    this.maxRebate = Math.min(this.maxRebate, MAX_REBATE);
-
-    // Step 5: Calculate total tax before rebate
-    this.totalTax = this.slab26_27V2(this.totalIncomeAfterExemption, this.taxFreeLimit);
-    this.taxAfterRebate = this.totalTax - this.maxRebate;
-
-    if (this.totalTax <= 0) {
-      this.taxAfterRebate = 0;
-      this.totalTax = 0;
-      this.maxRebate = 0;
-    } else if (this.taxAfterRebate <= this.minTax) {
-      this.taxAfterRebate = this.minTax;
-      this.totalTax = this.minTax;
-      this.maxRebate = 0;
-    }
-
-    this.monthlyTDS = this.taxAfterRebate / 12;
   }
 
 
-  slab26_27V2(incomeAmount: number, taxFreeLimit: number): number {
-    const taxableAmount = incomeAmount - taxFreeLimit;
-    if (taxableAmount <= 0) return 0;
-
-    const slabs = [
-      { limit: 100000, rate: 0.05 },
-      { limit: 400000, rate: 0.10 },
-      { limit: 500000, rate: 0.15 },
-      { limit: 500000, rate: 0.20 },
-      { limit: 2000000, rate: 0.25 },
-      { limit: Infinity, rate: 0.30 }
-    ];
-
-    let remaining = taxableAmount;
-    let tax = 0;
-
-    for (const slab of slabs) {
-      if (remaining <= 0) break;
-
-      const taxableInSlab = Math.min(remaining, slab.limit);
-      tax += taxableInSlab * slab.rate;
-      remaining -= taxableInSlab;
-    }
-
-    return tax;
-  }
 
   formatIndianNumber(amount: number): string {
     const amt = Math.round(amount).toString();
