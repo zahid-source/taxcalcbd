@@ -5,7 +5,7 @@
   }
 </select>
 
-@if (calcInput === CALC_INPUT.MONTHLY_SALARY) {
+@if (calcInput === CALC_INPUT_ENUM.MONTHLY_SALARY) {
   <label>Monthly Salary</label>
   <p-inputnumber inputId="integeronly" [(ngModel)]="monthlySalary" (keyup)="isShow = false;calcFestival()"
                  placeholder="Enter monthly salary" locale="en-IN"></p-inputnumber>
@@ -14,10 +14,12 @@
   <p-inputnumber inputId="integeronly" [(ngModel)]="festivalBonus" (keyup)="isShow = false"
                  placeholder="Enter festival salary" locale="en-IN"></p-inputnumber>
 
-}
-
-@if (calcInput === CALC_INPUT.TOTAL_INCOME) {
+} @else if (calcInput === CALC_INPUT_ENUM.TOTAL_INCOME) {
   <label>Total Income With Bonus (yearly)</label>
+  <p-inputnumber inputId="integeronly" [(ngModel)]="totalIncome" (keyup)="isShow = false;"
+                 placeholder="Enter total income" locale="en-IN"></p-inputnumber>
+} @else{
+  <label>Total Income After Exemption</label>
   <p-inputnumber inputId="integeronly" [(ngModel)]="totalIncome" (keyup)="isShow = false;"
                  placeholder="Enter total income" locale="en-IN"></p-inputnumber>
 }
@@ -42,7 +44,6 @@
 
 
 <button type="submit" style="margin-top: 20px" (click)="calculate()">Calculate</button>
-
 @if (isShow && totalIncome > 0) {
   <table class="results-table">
     <tbody>
@@ -52,37 +53,67 @@
     </tr>
     <tr>
       <td>b. Exemption <i>(1/3 of a) max: 5 lakh</i></td>
-      <td class="value">{{ formatIndianNumber(exemption) }}</td>
+      <td class="value">{{ formatIndianNumber(taxResult.exemption) }}</td>
     </tr>
     <tr>
       <td>c. Total Income After Exemption <i>(a-b)</i></td>
-      <td class="value">{{ formatIndianNumber(totalIncomeAfterExemption) }}</td>
+      <td class="value">{{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</td>
     </tr>
     <tr>
       <td>d. Tax Without Rebate <i>(slab of c)</i></td>
-      <td class="value">{{ formatIndianNumber(totalTax) }}</td>
+      <td class="value">{{ formatIndianNumber(taxResult.totalTax) }}</td>
     </tr>
     <tr>
       <td>e. Max Rebate <i>(3% of c) max: 10 lakh</i></td>
-      <td class="value">{{ formatIndianNumber(maxRebate) }}</td>
+      <td class="value">{{ formatIndianNumber(taxResult.maxRebate) }}</td>
     </tr>
     <tr>
       <td>f. Tax After Max Rebate <i>(d-e)</i></td>
-      <td class="value">{{ formatIndianNumber(taxAfterRebate) }}</td>
+      <td class="value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</td>
     </tr>
 
-      @if (calcInput === CALC_INPUT.MONTHLY_SALARY) {
+      @if (calcInput != CALC_INPUT_ENUM.TOTAL_INCOME) {
         <tr>
           <td>g. Monthly TDS <i>(f/12)</i></td>
-          <td class="value">{{ formatIndianNumber(monthlyTDS) }}</td>
+          <td class="value">{{ formatIndianNumber(taxResult.monthlyTDS) }}</td>
         </tr>
         <tr>
           <td>h. Monthly Salary After TDS</td>
-          <td class="value">{{ formatIndianNumber(monthlySalary - monthlyTDS) }}</td>
+          <td class="value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</td>
         </tr>
       }
     </tbody>
   </table>
+
+  <table class="results-table">
+    <tr>
+      <td colspan="3" style="color: #2c3e9f; font-style: italic;"><b>Slab Breakdown of ({{formatIndianNumber(taxResult.totalIncomeAfterExemption)}}) :</b></td>
+    </tr>
+    <tr>
+      <td>Slab Amount</td>
+      <td style="text-align: center">Tax Rate (%)</td>
+      <td style="text-align: right">Tax</td>
+    </tr>
+    @for (slab of taxResult.slabBreakDown; track slab.rate) {
+      <tr>
+        @if(slab.rate == 0) {
+          <td>first {{ formatIndianNumber(slab.amount) }}</td>
+        } @else {
+          <td>next {{ formatIndianNumber(slab.amount) }}</td>
+        }
+
+        <td style="text-align: center">{{ slab.rate }}</td>
+        <td style="text-align: right">{{ formatIndianNumber(slab.tax) }}</td>
+      </tr>
+    }
+
+    <tr>
+      <td style="color: #2c3e9f;"><b>Total: {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b></td>
+      <td></td>
+      <td style="text-align: right;color: #2c3e9f;"><b>Slab Tax: {{ formatIndianNumber(taxResult.totalTax) }}</b></td>
+    </tr>
+  </table>
 }
+
 
 

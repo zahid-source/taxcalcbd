@@ -5,11 +5,6 @@ import {Injectable} from '@angular/core';
 })
 export class TaxCalcService {
 
-
-// ---------- Calculator ----------
-
-
-  // Step 1
   static calculateExemption(totalIncome: number, exemptionRate: number, maxExemption: number): number {
     return Math.min(
       totalIncome * exemptionRate,
@@ -17,42 +12,32 @@ export class TaxCalcService {
     );
   }
 
-  // Step 2
   static calculateSlabs(incomeAfterExemption: number, taxFreeLimit: number, slabs: Slab[]): SlabOutput {
     let remainingIncome = incomeAfterExemption;
     let breakdown: SlabBreakdown[] = [];
     let totalTax = 0;
-
-    // Tax-free slab
     let taxFreeAmount = Math.min(remainingIncome, taxFreeLimit);
-
     breakdown.push({amount: taxFreeAmount, rate: 0, tax: 0});
-
     remainingIncome -= taxFreeAmount;
-
-
     for (let i = 0; i < slabs.length && remainingIncome > 0; i++) {
       const slab = slabs[i];
       const taxableAmount = Math.min(remainingIncome, slab.limit);
-
-      const slabTax = taxableAmount * (slab.rate / 100);
-
+      const slabTax = Math.round(taxableAmount * (slab.rate / 100));
       breakdown.push({amount: taxableAmount, rate: slab.rate, tax: slabTax});
-
       totalTax += slabTax;
       remainingIncome -= taxableAmount;
     }
 
+    totalTax = Math.round(totalTax);
     return {breakdown, totalTax};
   }
 
-  // Step 3
+
   static applyRebate(input: RebateInput): RebateOutput {
-    let maxRebate = input.totalIncomeAfterExemption * input.REBATE_RATE;
-    maxRebate = Math.min(maxRebate, input.MAX_REBATE);
-
+    let maxRebate = input.totalIncomeAfterExemption * input.rebateRate;
+    maxRebate = Math.min(maxRebate, input.maxRebate);
+    maxRebate = Math.round(maxRebate);
     let taxAfterRebate = input.totalTax - maxRebate;
-
     if (input.totalTax <= 0) {
       taxAfterRebate = 0;
       maxRebate = 0;
@@ -60,13 +45,18 @@ export class TaxCalcService {
       taxAfterRebate = input.minTax;
       maxRebate = 0;
     }
+    taxAfterRebate = Math.round(taxAfterRebate);
 
-    return {taxAfterRebate, maxRebate};
+    return {
+      taxAfterRebate: taxAfterRebate,
+      maxRebate: maxRebate
+    };
   }
+
 
   static calculateTax(input: TaxInput): TaxResult {
 
-    const exemption = this.calculateExemption(input.totalIncome, input.EXEMPTION_RATE, input.MAX_EXEMPTION);
+    const exemption = this.calculateExemption(input.totalIncome, input.exemptionRate, input.maxExemption);
 
     let totalIncomeAfterExemption = input.totalIncome - exemption;
 
@@ -77,14 +67,12 @@ export class TaxCalcService {
     );
 
     const rebate: RebateOutput = this.applyRebate({
-      totalIncomeAfterExemption,
+      totalIncomeAfterExemption: totalIncomeAfterExemption,
       totalTax: slabResult.totalTax,
-      REBATE_RATE: input.REBATE_RATE,
-      MAX_REBATE: input.MAX_REBATE,
+      rebateRate: input.rebateRate,
+      maxRebate: input.maxRebate,
       minTax: input.minTax
     });
-
-    const monthlyTDS = rebate.taxAfterRebate / 12;
 
     return {
       exemption,
@@ -92,8 +80,8 @@ export class TaxCalcService {
       maxRebate: rebate.maxRebate,
       totalTax: slabResult.totalTax,
       taxAfterRebate: rebate.taxAfterRebate,
-      monthlyTDS,
-      breakdown: slabResult.breakdown
+      monthlyTDS: Math.round(rebate.taxAfterRebate / 12),
+      slabBreakDown: slabResult.breakdown
     };
   }
 }

@@ -44,10 +44,12 @@ button:hover {
   font-size: 15px;
 }
 
-.value {
+.results-table td.value {
+  text-align: right;
   font-weight: bold;
   color: #2c3e9f;
 }
+
 .results-table {
   width: 100%;
   font-size: 14px;
@@ -61,11 +63,6 @@ button:hover {
 }
 .results-table td i {
   color: #0ea8d5;
-}
-
-.results-table td.value {
-  text-align: right;
-  font-weight: bold;
 }
 
 
