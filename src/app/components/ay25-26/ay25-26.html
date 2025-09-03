@@ -72,7 +72,7 @@
       <td class="value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</td>
     </tr>
 
-      @if (calcInput != CALC_INPUT_ENUM.TOTAL_INCOME) {
+      @if (calcInput == CALC_INPUT_ENUM.TOTAL_INCOME) {
         <tr>
           <td>g. Monthly TDS <i>(f/12)</i></td>
           <td class="value">{{ formatIndianNumber(taxResult.monthlyTDS) }}</td>
