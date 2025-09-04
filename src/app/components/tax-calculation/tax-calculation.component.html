@@ -1,11 +1,11 @@
 <label>Calculation Input</label>
-<select [(ngModel)]="calcInput" (change)="isShow = false">
-  @for (input of calcInputOptions; track input.value) {
+<select [(ngModel)]="taxModel.calcInput" (change)="isShow = false">
+  @for (input of taxModel.CALC_INPUT_OPTIONS; track input.value) {
     <option [value]="input.value">{{ input.label }}</option>
   }
 </select>
 
-@if (calcInput === CALC_INPUT_ENUM.MONTHLY_SALARY) {
+@if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
   <label>Monthly Salary</label>
   <p-inputnumber inputId="integeronly" [(ngModel)]="monthlySalary" (keyup)="isShow = false;calcFestival()"
                  placeholder="Enter monthly salary" locale="en-IN"></p-inputnumber>
@@ -14,7 +14,7 @@
   <p-inputnumber inputId="integeronly" [(ngModel)]="festivalBonus" (keyup)="isShow = false"
                  placeholder="Enter festival salary" locale="en-IN"></p-inputnumber>
 
-} @else if (calcInput === CALC_INPUT_ENUM.TOTAL_INCOME) {
+} @else if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.TOTAL_INCOME) {
   <label>Total Income With Bonus (yearly)</label>
   <p-inputnumber inputId="integeronly" [(ngModel)]="totalIncome" (keyup)="isShow = false;"
                  placeholder="Enter total income" locale="en-IN"></p-inputnumber>
@@ -25,8 +25,8 @@
 }
 
 <label>Tax Free Limit</label>
-<select [(ngModel)]="taxFreeLimit" (change)="isShow = false">
-  @for (input of taxFreeLimitOptions; track input.value) {
+<select [(ngModel)]="taxModel.taxFreeLimit" (change)="isShow = false">
+  @for (input of taxModel.TAX_FREE_LIMIT_OPTIONS; track input.value) {
     <option [value]="input.value">
       {{ input.label }}
     </option>
@@ -34,8 +34,8 @@
 </select>
 
 <label>Minimum Tax</label>
-<select [(ngModel)]="minTax" (change)="isShow = false">
-  @for (input of minTaxOptions; track input.value) {
+<select [(ngModel)]="taxModel.minTax" (change)="isShow = false">
+  @for (input of taxModel.MIN_TAX_OPTIONS; track input.value) {
     <option [value]="input.value">
       {{ input.label }}
     </option>
@@ -72,7 +72,7 @@
       <td class="value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</td>
     </tr>
 
-      @if (calcInput == CALC_INPUT_ENUM.MONTHLY_SALARY) {
+      @if (taxModel.calcInput == taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
         <tr>
           <td>g. Monthly TDS <i>(f/12)</i></td>
           <td class="value">{{ formatIndianNumber(taxResult.monthlyTDS) }}</td>

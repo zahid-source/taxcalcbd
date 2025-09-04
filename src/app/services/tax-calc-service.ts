@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {RebateInput, RebateOutput, Slab, SlabBreakdown, SlabOutput, TaxInput, TaxResult} from '../models/model';
 
 @Injectable({
   providedIn: 'root'
