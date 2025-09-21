@@ -62,7 +62,7 @@
 
   </table>
 
-  <table style="margin-top: 10px" class="results-table">
+  <table class="results-table">
     <tr>
       <td colspan="3" style="color: #2c3e9f; font-style: italic;"><b>Slab Breakdown of ({{formatIndianNumber(taxResult.totalIncomeAfterExemption)}}) :</b></td>
     </tr>
@@ -95,6 +95,10 @@
     <tr>
       <td>d. Tax Without Rebate <i>(slab of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }})</i></td>
       <td class="value">{{ formatIndianNumber(taxResult.totalTax) }}</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
     </tr>
     <tr>
       <td>e. Max Rebate <i>(3% of c) max: 10 lakh</i></td>
