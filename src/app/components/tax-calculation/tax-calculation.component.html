@@ -44,9 +44,9 @@
 
 
 <button type="submit" style="margin-top: 20px" (click)="calculate()">Calculate</button>
+
 @if (isShow && totalIncome > 0) {
   <table class="results-table">
-    <tbody>
     <tr>
       <td>a. Total Income With Bonus</td>
       <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
@@ -59,8 +59,41 @@
       <td>c. Total Income After Exemption <i>(a-b)</i></td>
       <td class="value">{{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</td>
     </tr>
+
+  </table>
+
+  <table style="margin-top: 10px" class="results-table">
     <tr>
-      <td>d. Tax Without Rebate <i>(slab of c)</i></td>
+      <td colspan="3" style="color: #2c3e9f; font-style: italic;"><b>Slab Breakdown of ({{formatIndianNumber(taxResult.totalIncomeAfterExemption)}}) :</b></td>
+    </tr>
+    <tr>
+      <td style="width: 33%;">Amount</td>
+      <td style="text-align: center; width: 33%">Rate</td>
+      <td style="text-align: right; width: 33%">Tax</td>
+    </tr>
+    @for (slab of taxResult.slabBreakDown; track slab.rate) {
+      <tr>
+        @if(slab.rate == 0) {
+          <td style="width: 33%;">first {{ formatIndianNumber(slab.amount) }}</td>
+        } @else {
+          <td>next {{ formatIndianNumber(slab.amount) }}</td>
+        }
+
+        <td style="text-align: center;width: 33%">{{ slab.rate }} %</td>
+        <td style="text-align: right;width: 33%">{{ formatIndianNumber(slab.tax) }}</td>
+      </tr>
+    }
+
+    <tr>
+      <td style="color: #2c3e9f;"><b>Total: {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b></td>
+      <td></td>
+      <td style="text-align: right;color: #2c3e9f;"><b>{{ formatIndianNumber(taxResult.totalTax) }}</b></td>
+    </tr>
+  </table>
+
+  <table class="results-table">
+    <tr>
+      <td>d. Tax Without Rebate <i>(slab of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }})</i></td>
       <td class="value">{{ formatIndianNumber(taxResult.totalTax) }}</td>
     </tr>
     <tr>
@@ -82,37 +115,10 @@
           <td class="value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</td>
         </tr>
       }
-    </tbody>
+
   </table>
 
-  <table class="results-table">
-    <tr>
-      <td colspan="3" style="color: #2c3e9f; font-style: italic;"><b>Slab Breakdown of ({{formatIndianNumber(taxResult.totalIncomeAfterExemption)}}) :</b></td>
-    </tr>
-    <tr>
-      <td>Slab Amount</td>
-      <td style="text-align: center">Tax Rate (%)</td>
-      <td style="text-align: right">Tax</td>
-    </tr>
-    @for (slab of taxResult.slabBreakDown; track slab.rate) {
-      <tr>
-        @if(slab.rate == 0) {
-          <td>first {{ formatIndianNumber(slab.amount) }}</td>
-        } @else {
-          <td>next {{ formatIndianNumber(slab.amount) }}</td>
-        }
 
-        <td style="text-align: center">{{ slab.rate }}</td>
-        <td style="text-align: right">{{ formatIndianNumber(slab.tax) }}</td>
-      </tr>
-    }
-
-    <tr>
-      <td style="color: #2c3e9f;"><b>Total: {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b></td>
-      <td></td>
-      <td style="text-align: right;color: #2c3e9f;"><b>Slab Tax: {{ formatIndianNumber(taxResult.totalTax) }}</b></td>
-    </tr>
-  </table>
 }
 
 
