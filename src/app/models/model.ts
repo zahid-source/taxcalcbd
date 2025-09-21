@@ -39,7 +39,7 @@ export interface SlabOutput {
 
 export interface RebateInput {
   totalIncomeAfterExemption: number;
-  totalTax: number;
+  slabTax: number;
   rebateRate: number;
   maxRebate: number;
   minTax: number;
