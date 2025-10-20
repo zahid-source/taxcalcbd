@@ -22,5 +22,7 @@ export class App {
     console.log(this.selectedAy);
   }
 
-
+  print() {
+    window.print();
+  }
 }
