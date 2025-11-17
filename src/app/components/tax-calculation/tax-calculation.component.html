@@ -61,9 +61,9 @@
         <td>c. Total Income After Exemption <i>(a-b)</i></td>
         <td class="value">{{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</td>
       </tr>
-  
+
     </table>
-  
+
     <table class="results-table">
       <tr>
         <td colspan="3" style="color: #2c3e9f; font-style: italic;"><b>Slab Breakdown of ({{formatIndianNumber(taxResult.totalIncomeAfterExemption)}}) :</b></td>
@@ -80,19 +80,19 @@
           } @else {
             <td>next {{ formatIndianNumber(slab.amount) }}</td>
           }
-  
+
           <td style="text-align: center">{{ slab.rate }} %</td>
           <td style="text-align: right">{{ formatIndianNumber(slab.tax) }}</td>
         </tr>
       }
-  
+
       <tr>
         <td style="color: #2c3e9f;"><b>Total: {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b></td>
         <td></td>
         <td style="text-align: right;color: #2c3e9f;"><b> Tax: {{ formatIndianNumber(taxResult.totalTax) }}</b></td>
       </tr>
     </table>
-  
+
     <table style="margin-top: 20px" class="results-table">
       <tr>
         <td>d. Tax Without Rebate <i>(slab of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }})</i></td>
@@ -106,7 +106,7 @@
         <td>f. Tax After Max Rebate <i>(d-e)</i></td>
         <td class="value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</td>
       </tr>
-  
+
         @if (taxModel.calcInput == taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
           <tr>
             <td>g. Monthly TDS <i>(f/12)</i></td>
@@ -117,7 +117,7 @@
             <td class="value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</td>
           </tr>
         }
-  
+
     </table>
   </div>
 }

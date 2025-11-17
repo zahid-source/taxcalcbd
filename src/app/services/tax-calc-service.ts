@@ -45,6 +45,7 @@ export class TaxCalcService {
     } else if (taxAfterRebate <= input.minTax) {
       taxAfterRebate = input.minTax;
       maxRebate = (input.slabTax - taxAfterRebate);
+      maxRebate = Math.max(maxRebate, 0);
     }
     taxAfterRebate = Math.round(taxAfterRebate);
 
