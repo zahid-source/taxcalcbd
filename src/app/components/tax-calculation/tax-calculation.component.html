@@ -99,8 +99,12 @@
         <td class="value">{{ formatIndianNumber(taxResult.totalTax) }}</td>
       </tr>
       <tr>
-        <td>e. Max Rebate <i>(3% of c) max: 10 lakh</i></td>
+        <td>e. Max Rebate <i>(3% of c) max: {{formatIndianNumber(taxModel.MAX_REBATE)}}</i></td>
         <td class="value">{{ formatIndianNumber(taxResult.maxRebate) }}</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="value" style="font-weight: normal;font-size: 13px"><i>( Required Investment: <b>{{ formatIndianNumber(taxResult.investRequired) }} )</b></i></td>
       </tr>
       <tr>
         <td>f. Tax After Max Rebate <i>(d-e)</i></td>

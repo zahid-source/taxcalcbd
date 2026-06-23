@@ -18,7 +18,8 @@ export interface TaxInput {
   minTax: number;
   exemptionRate: number;
   maxExemption: number;
-  rebateRate: number;
+  rebateRateOnTaxableIncome: number;
+  rebateRateOnActualInvestment: number;
   maxRebate: number;
 }
 
@@ -29,6 +30,7 @@ export interface TaxResult {
   totalTax: number;
   taxAfterRebate: number;
   monthlyTDS: number;
+  investRequired: number;
   slabBreakDown: SlabBreakdown[];
 }
 
@@ -40,7 +42,8 @@ export interface SlabOutput {
 export interface RebateInput {
   totalIncomeAfterExemption: number;
   slabTax: number;
-  rebateRate: number;
+  rebateRateOnTaxableIncome: number;
+  rebateRateOnActualInvestment: number;
   maxRebate: number;
   minTax: number;
 }
@@ -48,6 +51,7 @@ export interface RebateInput {
 export interface RebateOutput {
   taxAfterRebate: number;
   maxRebate: number;
+  investRequired: number;
 }
 
 export const AY = {
@@ -72,7 +76,8 @@ export interface TaxModel {
   // Constants
   EXEMPTION_RATE: number;
   MAX_EXEMPTION: number;
-  REBATE_RATE: number;
+  REBATE_RATE_ON_TAXABLE_INCOME: number;
+  REBATE_RATE_ON_ACTUAL_INVESTMENT: number;
   MAX_REBATE: number;
   SLAB: Slab[];
 

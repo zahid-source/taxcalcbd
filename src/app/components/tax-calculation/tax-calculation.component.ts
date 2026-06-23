@@ -66,7 +66,8 @@ export class TaxCalculation {
       slabs: this.taxModel.SLAB,
       exemptionRate: this.taxModel.EXEMPTION_RATE,
       maxExemption: this.taxModel.MAX_EXEMPTION,
-      rebateRate: this.taxModel.REBATE_RATE,
+      rebateRateOnTaxableIncome: this.taxModel.REBATE_RATE_ON_TAXABLE_INCOME,
+      rebateRateOnActualInvestment: this.taxModel.REBATE_RATE_ON_ACTUAL_INVESTMENT,
       maxRebate: this.taxModel.MAX_REBATE,
     });
 

@@ -35,7 +35,7 @@ export class TaxCalcService {
 
 
   static applyRebate(input: RebateInput): RebateOutput {
-    let maxRebate = input.totalIncomeAfterExemption * input.rebateRate;
+    let maxRebate = input.totalIncomeAfterExemption * input.rebateRateOnTaxableIncome;
     maxRebate = Math.min(maxRebate, input.maxRebate);
     maxRebate = Math.round(maxRebate);
     let taxAfterRebate = input.slabTax - maxRebate;
@@ -51,7 +51,8 @@ export class TaxCalcService {
 
     return {
       taxAfterRebate: taxAfterRebate,
-      maxRebate: maxRebate
+      maxRebate: maxRebate,
+      investRequired: maxRebate / input.rebateRateOnActualInvestment
     };
   }
 
@@ -71,7 +72,8 @@ export class TaxCalcService {
     const rebate: RebateOutput = this.applyRebate({
       totalIncomeAfterExemption: totalIncomeAfterExemption,
       slabTax: slabResult.totalTax,
-      rebateRate: input.rebateRate,
+      rebateRateOnTaxableIncome: input.rebateRateOnTaxableIncome,
+      rebateRateOnActualInvestment: input.rebateRateOnActualInvestment,
       maxRebate: input.maxRebate,
       minTax: input.minTax
     });
@@ -82,6 +84,7 @@ export class TaxCalcService {
       maxRebate: rebate.maxRebate,
       totalTax: slabResult.totalTax,
       taxAfterRebate: rebate.taxAfterRebate,
+      investRequired: rebate.investRequired,
       monthlyTDS: Math.round(rebate.taxAfterRebate / 12),
       slabBreakDown: slabResult.breakdown
     };

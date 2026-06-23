@@ -22,8 +22,9 @@ export const TAX_MODEL_26_27: TaxModel = {
   // Constants
   EXEMPTION_RATE: 1 / 3,
   MAX_EXEMPTION: 500000,
-  REBATE_RATE: 0.03,
-  MAX_REBATE: 1000000,
+  REBATE_RATE_ON_TAXABLE_INCOME: 0.03,
+  REBATE_RATE_ON_ACTUAL_INVESTMENT: 0.1,
+  MAX_REBATE: 750000,
   SLAB: [
     { limit: 300000, rate: 10 },
     { limit: 400000, rate: 15 },
