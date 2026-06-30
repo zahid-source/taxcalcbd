@@ -2,10 +2,10 @@ import {TaxModel} from './model';
 export const TAX_MODEL_26_27: TaxModel = {
   // Dropdown options
   TAX_FREE_LIMIT_OPTIONS: [
-    {label: '3,75,000 (Male)', value: 375000},
-    {label: '4,25,000 (Female/65+ Age)', value: 425000},
-    {label: '5,00,000 (Person with Disability / Third Gender)', value: 500000},
-    {label: '5,25,000 (Freedom Fighter)', value: 525000}
+    {label: '4,00,000 (Male)', value: 400000},
+    {label: '4,50,000 (Female/65+ Age)', value: 450000},
+    {label: '5,25,000 (Person with Disability / Third Gender)', value: 520000},
+    {label: '5,50,000 (Freedom Fighter)', value: 555000}
   ],
 
   CALC_INPUT_OPTIONS: [
