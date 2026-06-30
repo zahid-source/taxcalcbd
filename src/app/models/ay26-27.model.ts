@@ -51,7 +51,7 @@ export const TAX_MODEL_26_27: TaxModel = {
   },
 
   // User input selections (default values)
-  taxFreeLimit: 375000,
+  taxFreeLimit: 400000,
   calcInput: 'MONTHLY_SALARY',
   minTax: 5000,
 
