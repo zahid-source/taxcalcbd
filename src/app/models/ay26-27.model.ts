@@ -4,8 +4,8 @@ export const TAX_MODEL_26_27: TaxModel = {
   TAX_FREE_LIMIT_OPTIONS: [
     {label: '4,00,000 (Male)', value: 400000},
     {label: '4,50,000 (Female/65+ Age)', value: 450000},
-    {label: '5,25,000 (Person with Disability / Third Gender)', value: 520000},
-    {label: '5,50,000 (Freedom Fighter)', value: 555000}
+    {label: '5,25,000 (Person with Disability / Third Gender)', value: 525000},
+    {label: '5,50,000 (Freedom Fighter)', value: 550000}
   ],
 
   CALC_INPUT_OPTIONS: [
@@ -46,8 +46,8 @@ export const TAX_MODEL_26_27: TaxModel = {
   TAX_FREE_LIMIT_ENUM: {
     MALE : 375000,
     FEMALE_65_PLUS : 425000,
-    DISABILITY_THIRD_GENDER : 500000,
-    FREEDOM_FIGHTER : 525000
+    DISABILITY_THIRD_GENDER : 525000,
+    FREEDOM_FIGHTER : 550000
   },
 
   // User input selections (default values)
