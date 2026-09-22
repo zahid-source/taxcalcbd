@@ -110,6 +110,12 @@ interface Tick {
                 <span class="tip-val">{{ groupedNumber(s.points[hover].y) }}</span>
               </div>
             }
+            @if (extraLabel && extraValues.length) {
+              <div class="tip-row tip-extra">
+                <span class="tip-name">{{ extraLabel }}</span>
+                <span class="tip-val">{{ extraValues[hover] }}</span>
+              </div>
+            }
           </div>
         }
       </div>
@@ -123,6 +129,9 @@ interface Tick {
               @for (s of series; track s.name) {
                 <th>{{ s.name }}</th>
               }
+              @if (extraLabel && extraValues.length) {
+                <th>{{ extraLabel }}</th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -131,6 +140,9 @@ interface Tick {
                 <td>{{ groupedNumber(p.x) }}</td>
                 @for (s of series; track s.name) {
                   <td>{{ groupedNumber(s.points[i].y) }}</td>
+                }
+                @if (extraLabel && extraValues.length) {
+                  <td>{{ extraValues[i] }}</td>
                 }
               </tr>
             }
@@ -148,6 +160,10 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() xLabel = '';
   /** spoken label when the visible title is split across a control */
   @Input() ariaLabel = '';
+  /** a measure shown in the tooltip and table only - never drawn */
+  @Input() extraLabel = '';
+  /** pre-formatted, index-aligned with the first series' points */
+  @Input() extraValues: string[] = [];
   @Input() marker: LinePoint | null = null;
   @Input() markerLabel = 'You';
   @Input() area = true;

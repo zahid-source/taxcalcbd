@@ -311,6 +311,8 @@
         subtitle="How your Total Tax increase if the Yearly income changes"
         xLabel="Total income"
         [series]="incomeSeries"
+        extraLabel="Effective tax rate"
+        [extraValues]="incomeRates"
         [marker]="incomeMarker"
         markerLabel="You"
         [h]="250"></app-line-chart>

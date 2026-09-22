@@ -52,6 +52,8 @@ export class TaxCalculation {
   salaryMarker: LinePoint | null = null;
   incomeSeries: LineSeries[] = [];
   incomeMarker: LinePoint | null = null;
+  /** effective rate at each curve point - tooltip only, never drawn */
+  incomeRates: string[] = [];
 
 
   ngOnChanges() {
@@ -211,23 +213,31 @@ export class TaxCalculation {
       this.salaryMarker = null;
     }
 
-    const curve = TaxCalcService.buildIncomeCurve(input, 500);
+    // one row set keeps both lines and the rate column index-aligned
+    const rows = TaxCalcService.buildIncomeCurve(input, 500)
+      .map(p => ({x: p.x, afterRebate: p.y, totalTax: p.totalTax, rate: p.rate}));
+
+    rows.push({
+      x: input.totalIncome,
+      afterRebate: this.taxResult.taxAfterRebate,
+      totalTax: this.taxResult.totalTax,
+      rate: this.analytics.effectiveRate
+    });
+    rows.sort((a, b) => a.x - b.x);
 
     this.incomeSeries = [
-
       {
         name: 'Total tax',
         color: 'var(--series-2)',
-        points: this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.totalTax})),
-          input.totalIncome, this.taxResult.totalTax)
+        points: rows.map(r => ({x: r.x, y: r.totalTax}))
       },
       {
         name: 'Tax after rebate',
         color: 'var(--series-1)',
-        points: this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.y})),
-          input.totalIncome, this.taxResult.taxAfterRebate)
+        points: rows.map(r => ({x: r.x, y: r.afterRebate}))
       }
     ];
+    this.incomeRates = rows.map(r => this.percent(r.rate) + '%');
     this.incomeMarker = {x: input.totalIncome, y: this.taxResult.taxAfterRebate};
   }
 
