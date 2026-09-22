@@ -92,7 +92,7 @@ export class TaxCalcService {
       exemption,
       totalIncomeAfterExemption,
       maxRebate: rebate.maxRebate,
-      totalTax: slabResult.totalTax,
+      totalTax: Math.max(slabResult.totalTax, rebate.taxAfterRebate),
       taxAfterRebate: rebate.taxAfterRebate,
       investRequired: rebate.investRequired,
       monthlyTDS: Math.round(rebate.taxAfterRebate / 12),

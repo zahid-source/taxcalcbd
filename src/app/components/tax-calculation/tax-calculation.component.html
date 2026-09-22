@@ -59,20 +59,6 @@
           <span class="hero-step-label">Total tax</span>
           <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.totalTax) }}</span>
         </div>
-
-        <span class="hero-op" aria-hidden="true">&minus;</span>
-
-        <div class="hero-step">
-          <span class="hero-step-label">Max rebate</span>
-          <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.maxRebate) }}</span>
-        </div>
-
-        <span class="hero-op hero-op--eq" aria-hidden="true">=</span>
-
-        <div class="hero-step">
-          <span class="hero-step-label">Payable after rebate</span>
-          <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.taxAfterRebate) }}</span>
-        </div>
       </div>
 
       @if (showMonthlyCharts) {
