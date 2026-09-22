@@ -81,10 +81,12 @@ interface Tick {
 
           @if (markerPos) {
             <line class="marker-guide" [attr.x1]="markerPos.x" [attr.x2]="markerPos.x"
-                  [attr.y1]="markerPos.y" [attr.y2]="padT + plotH"></line>
-            <circle [attr.cx]="markerPos.x" [attr.cy]="markerPos.y" r="5"
-                    [attr.fill]="series[0].color" class="marker-dot"></circle>
-            <text class="marker-label" [attr.x]="markerPos.labelX" [attr.y]="markerPos.y - 12"
+                  [attr.y1]="markerPos.top" [attr.y2]="padT + plotH"></line>
+            @for (dot of markerPos.dots; track $index) {
+              <circle [attr.cx]="markerPos.x" [attr.cy]="dot.y" r="5"
+                      [attr.fill]="dot.color" class="marker-dot"></circle>
+            }
+            <text class="marker-label" [attr.x]="markerPos.labelX" [attr.y]="markerPos.top - 12"
                   [attr.text-anchor]="markerPos.anchor">{{ markerLabel }}</text>
           }
 
@@ -162,7 +164,8 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   yTicks: Tick[] = [];
   xTicks: Tick[] = [];
   paths: { name: string; color: string; line: string; area: string; dots: number[] }[] = [];
-  markerPos: { x: number; y: number; labelX: number; anchor: string } | null = null;
+  markerPos: { x: number; top: number; labelX: number; anchor: string;
+    dots: { y: number; color: string }[] } | null = null;
   hover: number | null = null;
 
   private x0 = 0;
@@ -276,11 +279,26 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     });
 
     if (this.marker) {
-      const mx = this.xOf(this.marker.x);
+      const markerX = this.marker.x;
+      const mx = this.xOf(markerX);
       const ratio = (mx - this.padL) / Math.max(1, this.plotW);
+
+      // every series carries the exact point, so each line gets its own dot
+      const dots = this.series
+        .map(s => {
+          const hit = s.points.find(p => p.x === markerX);
+          return hit ? {y: this.yOf(hit.y), color: s.color} : null;
+        })
+        .filter((d): d is { y: number; color: string } => d !== null);
+
+      if (!dots.length) {
+        dots.push({y: this.yOf(this.marker.y), color: this.series[0].color});
+      }
+
       this.markerPos = {
         x: mx,
-        y: this.yOf(this.marker.y),
+        top: Math.min(...dots.map(d => d.y)),
+        dots,
         labelX: ratio > 0.85 ? mx - 6 : ratio < 0.12 ? mx + 6 : mx,
         anchor: ratio > 0.85 ? 'end' : ratio < 0.12 ? 'start' : 'middle'
       };

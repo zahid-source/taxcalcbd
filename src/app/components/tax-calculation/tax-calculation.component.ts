@@ -3,16 +3,15 @@ import {InputNumber} from 'primeng/inputnumber';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalcService} from '../../services/tax-calc-service';
 
-import {AY, AY_VALUE, CurvePoint, SlabRow, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
+import {AY, AY_VALUE, SlabRow, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
 import {TAX_MODEL_25_26} from '../../models/ay25-26.model';
 import {TAX_MODEL_26_27} from '../../models/ay26-27.model';
 import {LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
 import {StatTileComponent} from '../stat-tile/stat-tile.component';
-import {SelectComponent, SelectOption} from '../ui/select.component';
+import {SelectComponent} from '../ui/select.component';
 import {groupedNumber} from '../charts/chart-utils';
 
 type ResultTab = 'calculation' | 'analytics';
-type IncomeMeasure = 'AFTER_REBATE' | 'TOTAL_TAX';
 
 @Component({
   selector: 'app-ay25-26',
@@ -54,13 +53,6 @@ export class TaxCalculation {
   incomeSeries: LineSeries[] = [];
   incomeMarker: LinePoint | null = null;
 
-  /** what the "total income vs ..." chart plots */
-  incomeMeasure: IncomeMeasure = 'AFTER_REBATE';
-  readonly INCOME_MEASURE_OPTIONS: SelectOption[] = [
-    {label: 'Tax after max rebate', value: 'AFTER_REBATE'},
-    {label: 'Total tax', value: 'TOTAL_TAX'}
-  ];
-  private incomeCurve: CurvePoint[] = [];
 
   ngOnChanges() {
     if (!this.ay) {
@@ -210,7 +202,8 @@ export class TaxCalculation {
       this.salarySeries = [{
         name: 'Monthly tax',
         color: 'var(--series-2)',
-        points: this.withCurrentPoint(curve, this.monthlySalary, this.taxResult.monthlyTDS)
+        points: this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.y})),
+          this.monthlySalary, this.taxResult.monthlyTDS)
       }];
       this.salaryMarker = {x: this.monthlySalary, y: this.taxResult.monthlyTDS};
     } else {
@@ -218,43 +211,29 @@ export class TaxCalculation {
       this.salaryMarker = null;
     }
 
-    this.incomeCurve = TaxCalcService.buildIncomeCurve(input, 500);
-    this.applyIncomeMeasure();
-  }
+    const curve = TaxCalcService.buildIncomeCurve(input, 500);
 
-  /** rebuilds the income chart for whichever measure the dropdown holds */
-  private applyIncomeMeasure() {
-    if (!this.incomeCurve.length || !this.taxResult) return;
+    this.incomeSeries = [
 
-    const useTotalTax = this.incomeMeasure === 'TOTAL_TAX';
-    const current = useTotalTax ? this.taxResult.totalTax : this.taxResult.taxAfterRebate;
-    const points: LinePoint[] = this.incomeCurve.map(p => ({x: p.x, y: useTotalTax ? p.totalTax : p.y}));
-    points.push({x: this.totalIncome, y: current});
-    points.sort((a, b) => a.x - b.x);
-
-    this.incomeSeries = [{name: this.incomeMeasureLabel, color: 'var(--series-1)', points}];
-    this.incomeMarker = {x: this.totalIncome, y: current};
-  }
-
-  onIncomeMeasureChange(value: IncomeMeasure) {
-    this.incomeMeasure = value;
-    this.applyIncomeMeasure();
-  }
-
-  get incomeMeasureLabel(): string {
-    return this.incomeMeasure === 'TOTAL_TAX' ? 'Total tax' : 'Tax after max rebate';
-  }
-
-  get incomeMeasureSubtitle(): string {
-    return this.incomeMeasure === 'TOTAL_TAX'
-      ? 'Slab tax before any rebate, across income levels'
-      : 'Tax payable once the rebate is applied, across income levels';
+      {
+        name: 'Total tax',
+        color: 'var(--series-2)',
+        points: this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.totalTax})),
+          input.totalIncome, this.taxResult.totalTax)
+      },
+      {
+        name: 'Tax after rebate',
+        color: 'var(--series-1)',
+        points: this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.y})),
+          input.totalIncome, this.taxResult.taxAfterRebate)
+      }
+    ];
+    this.incomeMarker = {x: input.totalIncome, y: this.taxResult.taxAfterRebate};
   }
 
   /** Makes sure the drawn curve passes exactly through the user's own figures. */
-  private withCurrentPoint(curve: CurvePoint[], x: number, y: number): LinePoint[] {
-    const points: LinePoint[] = curve.map(p => ({x: p.x, y: p.y}));
-    points.push({x, y});
+  private withCurrentPoint(curve: LinePoint[], x: number, y: number): LinePoint[] {
+    const points: LinePoint[] = [...curve, {x, y}];
     points.sort((a, b) => a.x - b.x);
     return points;
   }

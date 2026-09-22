@@ -307,21 +307,13 @@
 
     <section class="card">
       <app-line-chart
-        title="Total income vs"
-        [ariaLabel]="'Total income versus ' + incomeMeasureLabel"
-        [subtitle]="incomeMeasureSubtitle"
+        title="Total income vs Tax"
+        subtitle="Slab tax and what is left to pay after the rebate, across income levels"
         xLabel="Total income"
         [series]="incomeSeries"
         [marker]="incomeMarker"
         markerLabel="You"
-        [h]="250">
-        <app-select chart-control
-                    [inline]="true"
-                    ariaLabel="Measure plotted against total income"
-                    [options]="INCOME_MEASURE_OPTIONS"
-                    [value]="incomeMeasure"
-                    (valueChange)="onIncomeMeasureChange($event)"></app-select>
-      </app-line-chart>
+        [h]="250"></app-line-chart>
     </section>
   </div>
 }
