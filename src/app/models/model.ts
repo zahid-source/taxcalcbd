@@ -121,7 +121,23 @@ export interface TaxAnalytics {
 
 export interface CurvePoint {
   x: number;
+  /** tax payable after the rebate */
   y: number;
+  /** slab tax before the rebate */
+  totalTax: number;
   /** effective rate at this point, % */
   rate: number;
+}
+
+/** One slab line as the breakdown view renders it. */
+export interface SlabRow {
+  label: string;
+  range: string;
+  amount: number;
+  rate: number;
+  tax: number;
+  /** share of the taxable income sitting in this slab, % */
+  share: number;
+  /** css custom property for the slab's ordinal colour */
+  color: string;
 }

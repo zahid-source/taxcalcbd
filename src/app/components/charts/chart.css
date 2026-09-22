@@ -11,6 +11,17 @@
   margin-bottom: 12px;
 }
 
+.chart-heading {
+  min-width: 0;
+}
+
+.chart-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .chart-title {
   margin: 0;
   font-size: 0.9rem;

@@ -63,36 +63,49 @@
 
 @if (isShow && totalIncome > 0) {
 
-  <section class="card hero-card" aria-label="Summary">
-    <div>
-      <span class="hero-label">Tax payable for the year</span>
-      <div class="hero">
-        <span class="hero-cur">Tk</span>{{ formatIndianNumber(taxResult.taxAfterRebate) }}
+  <section class="card hero-card" aria-label="Tax summary">
+    <div class="hero-row">
+      <div class="hero-flow">
+        <div class="hero-step">
+          <span class="hero-step-label">Total tax</span>
+          <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.totalTax) }}</span>
+        </div>
+
+        <span class="hero-op" aria-hidden="true">&minus;</span>
+
+        <div class="hero-step">
+          <span class="hero-step-label">Max rebate</span>
+          <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.maxRebate) }}</span>
+        </div>
+
+        <span class="hero-op hero-op--eq" aria-hidden="true">=</span>
+
+        <div class="hero-step">
+          <span class="hero-step-label">Payable after rebate</span>
+          <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.taxAfterRebate) }}</span>
+        </div>
       </div>
-      <p class="hero-note">
-        {{ percent(analytics.effectiveRate) }}% of Tk {{ formatIndianNumber(totalIncome) }} total income
-        @if (analytics.minTaxApplied) {
-          <span class="chip chip--warn">Minimum tax floor applied</span>
-        }
-      </p>
+
+      @if (showMonthlyCharts) {
+        <div class="hero-step hero-side">
+          <span class="hero-step-label">Monthly TDS</span>
+          <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.monthlyTDS) }}</span>
+        </div>
+      }
     </div>
-    @if (showMonthlyCharts) {
-      <div class="hero-side">
-        <span class="hero-side-label">Monthly TDS</span>
-        <strong>Tk {{ formatIndianNumber(analytics.monthlyTDS) }}</strong>
-        <span class="hero-side-label">Take home / month</span>
-        <strong>Tk {{ formatIndianNumber(analytics.netMonthly) }}</strong>
-      </div>
+
+    @if (analytics.minTaxApplied) {
+      <p class="hero-note"><span class="chip chip--warn">Minimum tax floor applied</span></p>
     }
   </section>
 
   <div class="tabs" role="tablist" aria-label="Results view">
-    <button type="button" role="tab" class="tab" id="tab-breakdown"
-            [class.tab--active]="activeTab === 'breakdown'"
-            [attr.aria-selected]="activeTab === 'breakdown'"
-            aria-controls="panel-breakdown"
-            (click)="activeTab = 'breakdown'">
-      <i class="pi pi-list"></i> Breakdown
+    <button type="button" role="tab" class="tab" id="tab-calculation"
+            [class.tab--active]="activeTab === 'calculation'"
+            [attr.aria-selected]="activeTab === 'calculation'"
+            aria-controls="panel-calculation"
+            (click)="activeTab = 'calculation'">
+      <i class="pi pi-calculator"></i> Calculation
     </button>
     <button type="button" role="tab" class="tab" id="tab-analytics"
             [class.tab--active]="activeTab === 'analytics'"
@@ -103,87 +116,174 @@
     </button>
   </div>
 
-  <!-- ---------------- Breakdown ---------------- -->
-  <div class="tab-panel" id="panel-breakdown" role="tabpanel" aria-labelledby="tab-breakdown"
-       [class.tab-panel--hidden]="activeTab !== 'breakdown'">
-    <section class="card breakdown">
-      <div class="tax-results">
-        <table class="results-table">
-          <tr>
-            <td>a. Total Income With Bonus</td>
-            <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
-          </tr>
-          <tr>
-            <td>b. Exemption <i>(1/3 of a) max: 5 lakh</i></td>
-            <td class="value">{{ formatIndianNumber(taxResult.exemption) }}</td>
-          </tr>
-          <tr>
-            <td>c. Total Income After Exemption <i>(a-b)</i></td>
-            <td class="value">{{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</td>
-          </tr>
-        </table>
+  <!-- ---------------- Calculation ---------------- -->
+  <div class="tab-panel" id="panel-calculation" role="tabpanel" aria-labelledby="tab-calculation"
+       [class.tab-panel--hidden]="activeTab !== 'calculation'">
 
-        <table class="results-table slab-table">
-          <tr>
-            <td colspan="3" class="table-caption">
-              <b>Slab breakdown of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b>
-            </td>
-          </tr>
-          <tr class="head-row">
-            <td style="width: 40%;">Amount</td>
-            <td style="text-align: center; width: 20%">Rate</td>
-            <td style="text-align: right; width: 40%">Tax</td>
-          </tr>
-          @for (slab of taxResult.slabBreakDown; track slab.rate) {
-            <tr>
-              @if (slab.rate == 0) {
-                <td>first {{ formatIndianNumber(slab.amount) }}</td>
-              } @else {
-                <td>next {{ formatIndianNumber(slab.amount) }}</td>
-              }
-              <td style="text-align: center">{{ slab.rate }} %</td>
-              <td style="text-align: right">{{ formatIndianNumber(slab.tax) }}</td>
-            </tr>
+    <!-- Step 1 - taxable income -->
+    <section class="card step">
+      <header class="step-head">
+        <span class="step-num">1</span>
+        <div>
+          <h4>Taxable income</h4>
+          <p>What is left after the exemption comes off your total income</p>
+        </div>
+      </header>
+
+      <div class="equation">
+        <div class="eq-item">
+          <span class="eq-label">Total income</span>
+          <span class="eq-value">{{ formatIndianNumber(totalIncome) }}</span>
+          <span class="eq-note">Salary and bonus for the year</span>
+        </div>
+
+        <span class="eq-op" aria-hidden="true">&minus;</span>
+
+        <div class="eq-item">
+          <span class="eq-label">Exemption</span>
+          <span class="eq-value">{{ formatIndianNumber(taxResult.exemption) }}</span>
+          @if (exemptionApplied) {
+            <span class="eq-note">1/3 of income, capped at {{ formatIndianNumber(taxModel.MAX_EXEMPTION) }}</span>
+          } @else {
+            <span class="eq-note">Not applied in slab-only mode</span>
           }
-          <tr class="total-row">
-            <td><b>Total: {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b></td>
-            <td></td>
-            <td style="text-align: right"><b>Tax: {{ formatIndianNumber(taxResult.totalTax) }}</b></td>
-          </tr>
-        </table>
+        </div>
 
-        <table class="results-table">
-          <tr>
-            <td>d. Tax Without Rebate <i>(slab of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }})</i></td>
-            <td class="value">{{ formatIndianNumber(taxResult.totalTax) }}</td>
-          </tr>
-          <tr>
-            <td>e. Max Rebate <i>(3% of c) max: {{ formatIndianNumber(taxModel.MAX_REBATE) }}</i></td>
-            <td class="value">{{ formatIndianNumber(taxResult.maxRebate) }}</td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="value value--soft"><i>( Required Investment:
-              <b>{{ formatIndianNumber(taxResult.investRequired) }} )</b></i></td>
-          </tr>
-          <tr>
-            <td>f. Tax After Max Rebate <i>(d-e)</i></td>
-            <td class="value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</td>
-          </tr>
+        <span class="eq-op" aria-hidden="true">=</span>
 
-          @if (taxModel.calcInput == taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
-            <tr>
-              <td>g. Monthly TDS <i>(f/12)</i></td>
-              <td class="value">{{ formatIndianNumber(taxResult.monthlyTDS) }}</td>
-            </tr>
-            <tr>
-              <td>h. Monthly Salary After TDS</td>
-              <td class="value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</td>
-            </tr>
-          }
-        </table>
+        <div class="eq-item eq-item--result">
+          <span class="eq-label">Taxable income</span>
+          <span class="eq-value">{{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</span>
+          <span class="eq-note">Carried into the slabs below</span>
+        </div>
       </div>
     </section>
+
+    <!-- Step 2 - slabs -->
+    <section class="card step">
+      <header class="step-head">
+        <span class="step-num">2</span>
+        <div>
+          <h4>Slab breakdown</h4>
+          <p>Each slice of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }} is taxed at its own rate</p>
+        </div>
+      </header>
+
+      <div class="slab-bar" role="img"
+           [attr.aria-label]="'Taxable income split across ' + slabRows.length + ' slabs'">
+        @for (row of slabRows; track $index) {
+          <span class="slab-seg" [style.flex-grow]="row.share" [style.background]="row.color"
+                [title]="row.label + ' at ' + row.rate + '%'"></span>
+        }
+      </div>
+
+      <table class="slab-table">
+        <thead>
+          <tr>
+            <th class="col-slab">Income slice</th>
+            <th class="col-rate">Rate</th>
+            <th class="col-tax">Tax</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of slabRows; track $index) {
+            <tr [class.slab-row--free]="row.rate === 0">
+              <td class="col-slab">
+                <span class="slab-swatch" [style.background]="row.color"></span>
+                <span class="slab-name">{{ row.label }}</span>
+                <span class="slab-range">{{ row.range }}</span>
+              </td>
+              <td class="col-rate"><span class="rate-pill">{{ row.rate }}%</span></td>
+              <td class="col-tax">{{ formatIndianNumber(row.tax) }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="col-slab" colspan="2">Total on {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</td>
+            <td class="col-tax">{{ formatIndianNumber(taxResult.totalTax) }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- Step 3 - payable -->
+    <section class="card step">
+      <header class="step-head">
+        <span class="step-num">3</span>
+        <div>
+          <h4>Tax payable</h4>
+          <p>The investment rebate comes off the slab tax</p>
+        </div>
+      </header>
+
+      <div class="equation">
+        <div class="eq-item">
+          <span class="eq-label">Slab Tax</span>
+          <span class="eq-value">{{ formatIndianNumber(taxResult.totalTax) }}</span>
+          <span class="eq-note">Before any rebate</span>
+        </div>
+
+        <span class="eq-op" aria-hidden="true">&minus;</span>
+
+        <div class="eq-item">
+          <span class="eq-label">Max Rebate</span>
+          <span class="eq-value">{{ formatIndianNumber(taxResult.maxRebate) }}</span>
+          <span class="eq-note">3% of taxable income, max {{ formatIndianNumber(taxModel.MAX_REBATE) }}
+            <br> Required investment <b>{{ formatIndianNumber(taxResult.investRequired) }}</b></span>
+        </div>
+
+        <span class="eq-op" aria-hidden="true">=</span>
+
+        <div class="eq-item eq-item--result eq-item--final">
+          <span class="eq-label">Tax payable after Rebate</span>
+          <span class="eq-value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</span>
+          @if (analytics.minTaxApplied) {
+            <span class="eq-note">Minimum tax floor of {{ formatIndianNumber(taxModel.minTax) }} applied</span>
+          } @else {
+            <span class="eq-note">{{ percent(analytics.effectiveRate) }}% of total income</span>
+          }
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Step 4 - monthly take-home -->
+    @if (showMonthlyCharts) {
+      <section class="card step">
+        <header class="step-head">
+          <span class="step-num">4</span>
+          <div>
+            <h4>Monthly Salary</h4>
+            <p>The year's tax is deducted in twelve equal parts</p>
+          </div>
+        </header>
+
+        <div class="equation">
+          <div class="eq-item">
+            <span class="eq-label">Monthly salary</span>
+            <span class="eq-value">{{ formatIndianNumber(monthlySalary) }}</span>
+            <span class="eq-note">Base salary, bonus not included</span>
+          </div>
+
+          <span class="eq-op" aria-hidden="true">&minus;</span>
+
+          <div class="eq-item">
+            <span class="eq-label">Monthly TDS</span>
+            <span class="eq-value">{{ formatIndianNumber(taxResult.monthlyTDS) }}</span>
+            <span class="eq-note">Tax payable divided by 12</span>
+          </div>
+
+          <span class="eq-op" aria-hidden="true">=</span>
+
+          <div class="eq-item eq-item--result eq-item--final">
+            <span class="eq-label">Salary after TDS</span>
+            <span class="eq-value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</span>
+            <span class="eq-note">In hand each month</span>
+          </div>
+        </div>
+      </section>
+    }
   </div>
 
   <!-- ---------------- Analytics ---------------- -->
@@ -198,41 +298,20 @@
         hint="Average rate across your whole income"></app-stat-tile>
 
       <app-stat-tile
-        label="Rate after exemption"
-        [value]="percent(analytics.effectiveRateOnTaxable)" unit="%"
-        [meter]="analytics.effectiveRateOnTaxable / 30"
-        hint="After the exemption is deducted"></app-stat-tile>
-
-      <app-stat-tile
-        label="Marginal slab rate"
+        label="Current Slab"
         [value]="analytics.marginalRate" unit="%"
         [meter]="analytics.marginalRate / 30"
         hint="Rate on your next taka earned"></app-stat-tile>
-
-      <app-stat-tile
-        label="Take home"
-        [value]="percent(analytics.takeHomeRate)" unit="%"
-        [meter]="analytics.takeHomeRate / 100"
-        [hint]="'Tk ' + formatIndianNumber(analytics.netAnnual) + ' for the year'"></app-stat-tile>
 
       <app-stat-tile
         label="Taxable income"
         [value]="'Tk ' + formatIndianNumber(taxResult.totalIncomeAfterExemption)"
         [hint]="'After Tk ' + formatIndianNumber(taxResult.exemption) + ' exemption'"></app-stat-tile>
 
-      <app-stat-tile
-        label="Rebate saved"
-        [value]="'Tk ' + formatIndianNumber(analytics.rebateApplied)"
-        [hint]="'Needs Tk ' + formatIndianNumber(analytics.investRequired) + ' invested'"></app-stat-tile>
-
-      <app-stat-tile
-        label="Monthly TDS"
-        [value]="'Tk ' + formatIndianNumber(analytics.monthlyTDS)"
-        hint="Tax after rebate divided by 12"></app-stat-tile>
 
       @if (showMonthlyCharts) {
         <app-stat-tile
-          label="Net monthly pay"
+          label="Monthly Salary after TDS"
           [value]="'Tk ' + formatIndianNumber(analytics.netMonthly)"
           hint="Base salary less monthly TDS"></app-stat-tile>
       }
@@ -241,7 +320,7 @@
     @if (showMonthlyCharts) {
       <section class="card">
         <app-line-chart
-          title="Monthly salary vs monthly tax"
+          title="Monthly salary vs TDS"
           subtitle="How your TDS moves if the salary changes, same settings"
           xLabel="Monthly salary"
           [series]="salarySeries"
@@ -253,13 +332,21 @@
 
     <section class="card">
       <app-line-chart
-        title="Total income vs tax"
-        subtitle="Yearly tax payable across income levels, same exemption and rebate settings"
+        title="Total income vs"
+        [ariaLabel]="'Total income versus ' + incomeMeasureLabel"
+        [subtitle]="incomeMeasureSubtitle"
         xLabel="Total income"
         [series]="incomeSeries"
         [marker]="incomeMarker"
         markerLabel="You"
-        [h]="250"></app-line-chart>
+        [h]="250">
+        <select chart-control class="chart-select" aria-label="Measure plotted against total income"
+                [ngModel]="incomeMeasure" (ngModelChange)="onIncomeMeasureChange($event)">
+          @for (option of INCOME_MEASURE_OPTIONS; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </app-line-chart>
     </section>
   </div>
 }

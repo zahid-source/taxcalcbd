@@ -36,8 +36,11 @@ interface Tick {
   template: `
     <figure class="chart" #host>
       <figcaption class="chart-head">
-        <div>
-          <h4 class="chart-title">{{ title }}</h4>
+        <div class="chart-heading">
+          <div class="chart-title-row">
+            <h4 class="chart-title">{{ title }}</h4>
+            <ng-content select="[chart-control]"></ng-content>
+          </div>
           @if (subtitle) {
             <p class="chart-sub">{{ subtitle }}</p>
           }
@@ -53,7 +56,7 @@ interface Tick {
 
       <div class="plot-wrap">
         <svg [attr.viewBox]="'0 0 ' + w + ' ' + h" [attr.height]="h" width="100%"
-             role="img" [attr.aria-label]="title"
+             role="img" [attr.aria-label]="ariaLabel || title"
              (pointermove)="onMove($event)" (pointerleave)="hover = null">
 
           @for (t of yTicks; track t.v) {
@@ -141,6 +144,8 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() title = '';
   @Input() subtitle = '';
   @Input() xLabel = '';
+  /** spoken label when the visible title is split across a control */
+  @Input() ariaLabel = '';
   @Input() marker: LinePoint | null = null;
   @Input() markerLabel = 'You';
   @Input() area = true;

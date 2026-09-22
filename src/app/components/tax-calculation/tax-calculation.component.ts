@@ -3,14 +3,15 @@ import {InputNumber} from 'primeng/inputnumber';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalcService} from '../../services/tax-calc-service';
 
-import {AY, AY_VALUE, CurvePoint, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
+import {AY, AY_VALUE, CurvePoint, SlabRow, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
 import {TAX_MODEL_25_26} from '../../models/ay25-26.model';
 import {TAX_MODEL_26_27} from '../../models/ay26-27.model';
 import {LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
 import {StatTileComponent} from '../stat-tile/stat-tile.component';
 import {groupedNumber} from '../charts/chart-utils';
 
-type ResultTab = 'breakdown' | 'analytics';
+type ResultTab = 'calculation' | 'analytics';
+type IncomeMeasure = 'AFTER_REBATE' | 'TOTAL_TAX';
 
 @Component({
   selector: 'app-ay25-26',
@@ -39,7 +40,10 @@ export class TaxCalculation {
   analytics!: TaxAnalytics;
   isShow: boolean = false;
 
-  activeTab: ResultTab = 'breakdown';
+  activeTab: ResultTab = 'calculation';
+
+  /** slab lines with their share of taxable income, for the calculation view */
+  slabRows: SlabRow[] = [];
 
   // chart data
   showMonthlyCharts = false;
@@ -47,6 +51,14 @@ export class TaxCalculation {
   salaryMarker: LinePoint | null = null;
   incomeSeries: LineSeries[] = [];
   incomeMarker: LinePoint | null = null;
+
+  /** what the "total income vs ..." chart plots */
+  incomeMeasure: IncomeMeasure = 'AFTER_REBATE';
+  readonly INCOME_MEASURE_OPTIONS = [
+    {label: 'Tax after max rebate', value: 'AFTER_REBATE'},
+    {label: 'Total tax', value: 'TOTAL_TAX'}
+  ];
+  private incomeCurve: CurvePoint[] = [];
 
   ngOnChanges() {
     if (!this.ay) {
@@ -131,6 +143,7 @@ export class TaxCalculation {
 
     this.taxResult = TaxCalcService.calculateTax(input);
     this.analytics = TaxCalcService.buildAnalytics(input, this.taxResult, this.monthlySalary);
+    this.slabRows = this.buildSlabRows();
     this.buildCharts(input);
     this.isShow = true;
   }
@@ -151,6 +164,37 @@ export class TaxCalculation {
   }
 
   /* ---------------------------------------------------------------
+   * Calculation view
+   * --------------------------------------------------------------- */
+
+  private buildSlabRows(): SlabRow[] {
+    const taxable = this.taxResult.totalIncomeAfterExemption || 1;
+    let from = 0;
+    let taxedSlab = 0;
+
+    return this.taxResult.slabBreakDown.map((slab, i) => {
+      const to = from + slab.amount;
+      const row: SlabRow = {
+        label: (i === 0 ? 'First ' : 'Next ') + groupedNumber(slab.amount),
+        range: groupedNumber(from) + ' - ' + groupedNumber(to),
+        amount: slab.amount,
+        rate: slab.rate,
+        tax: slab.tax,
+        share: (slab.amount / taxable) * 100,
+        color: slab.rate === 0
+          ? 'var(--slab-free)'
+          : 'var(--slab-' + Math.min(++taxedSlab, 6) + ')'
+      };
+      from = to;
+      return row;
+    });
+  }
+
+  get exemptionApplied(): boolean {
+    return this.taxModel.calcInput != this.taxModel.CALC_INPUT_ENUM.ONLY_SLAB;
+  }
+
+  /* ---------------------------------------------------------------
    * Charts
    * --------------------------------------------------------------- */
 
@@ -160,7 +204,7 @@ export class TaxCalculation {
 
     if (this.showMonthlyCharts) {
       const bonusRatio = this.monthlySalary > 0 ? this.festivalBonus / this.monthlySalary : 0;
-      const curve = TaxCalcService.buildSalaryCurve(input, this.monthlySalary, bonusRatio, 36);
+      const curve = TaxCalcService.buildSalaryCurve(input, this.monthlySalary, bonusRatio, 500);
       this.salarySeries = [{
         name: 'Monthly tax',
         color: 'var(--series-2)',
@@ -172,13 +216,37 @@ export class TaxCalculation {
       this.salaryMarker = null;
     }
 
-    const incomeCurve = TaxCalcService.buildIncomeCurve(input, 36);
-    this.incomeSeries = [{
-      name: 'Yearly tax',
-      color: 'var(--series-1)',
-      points: this.withCurrentPoint(incomeCurve, input.totalIncome, this.taxResult.taxAfterRebate)
-    }];
-    this.incomeMarker = {x: input.totalIncome, y: this.taxResult.taxAfterRebate};
+    this.incomeCurve = TaxCalcService.buildIncomeCurve(input, 500);
+    this.applyIncomeMeasure();
+  }
+
+  /** rebuilds the income chart for whichever measure the dropdown holds */
+  private applyIncomeMeasure() {
+    if (!this.incomeCurve.length || !this.taxResult) return;
+
+    const useTotalTax = this.incomeMeasure === 'TOTAL_TAX';
+    const current = useTotalTax ? this.taxResult.totalTax : this.taxResult.taxAfterRebate;
+    const points: LinePoint[] = this.incomeCurve.map(p => ({x: p.x, y: useTotalTax ? p.totalTax : p.y}));
+    points.push({x: this.totalIncome, y: current});
+    points.sort((a, b) => a.x - b.x);
+
+    this.incomeSeries = [{name: this.incomeMeasureLabel, color: 'var(--series-1)', points}];
+    this.incomeMarker = {x: this.totalIncome, y: current};
+  }
+
+  onIncomeMeasureChange(value: IncomeMeasure) {
+    this.incomeMeasure = value;
+    this.applyIncomeMeasure();
+  }
+
+  get incomeMeasureLabel(): string {
+    return this.incomeMeasure === 'TOTAL_TAX' ? 'Total tax' : 'Tax after max rebate';
+  }
+
+  get incomeMeasureSubtitle(): string {
+    return this.incomeMeasure === 'TOTAL_TAX'
+      ? 'Slab tax before any rebate, across income levels'
+      : 'Tax payable once the rebate is applied, across income levels';
   }
 
   /** Makes sure the drawn curve passes exactly through the user's own figures. */

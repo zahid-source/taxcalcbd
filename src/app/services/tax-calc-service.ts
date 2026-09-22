@@ -142,6 +142,7 @@ export class TaxCalcService {
       points.push({
         x: totalIncome,
         y: result.taxAfterRebate,
+        totalTax: result.totalTax,
         rate: totalIncome > 0 ? (result.taxAfterRebate / totalIncome) * 100 : 0
       });
     }
@@ -159,6 +160,7 @@ export class TaxCalcService {
       points.push({
         x: salary,
         y: Math.round(result.taxAfterRebate / 12),
+        totalTax: Math.round(result.totalTax / 12),
         rate: annual > 0 ? (result.taxAfterRebate / annual) * 100 : 0
       });
     }
