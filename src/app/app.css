@@ -1,108 +1,158 @@
-.container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  background: #f9fafb;
-  border-radius: 10px;
-  /*box-shadow: 0 4px 8px rgba(0,0,0,0.05);*/
-  font-family: Arial, sans-serif;
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 20px 40px;
 }
 
-.credit {
-  margin-top: 20px;
-  font-size: 14px;
-  color: #555;
+app-ay25-26 {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--accent-solid);
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+}
+
+.brand p {
+  margin: 1px 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- assessment year row ---------- */
+
+.context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  padding: 0 2px;
+}
+
+.ay-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ay-field > span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.ay-field select {
+  width: auto;
+  min-width: 140px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  font-weight: 600;
+}
+
+.income-year {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.income-year b {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- footer ---------- */
+
+.credit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.credit a {
+  color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .copyright-icon {
-  font-weight: bold;
-  font-size: 16px;
-  color: #007bff;
-}
-.header-container {
-  text-align: center;
-  margin-bottom: 15px;   /* Reduced bottom space */
-  font-family: Arial, sans-serif;
-  color: #333;
+  font-weight: 700;
+  color: var(--accent);
 }
 
-.header-container h3 {
-  margin: 4px 0 2px 0;
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: #555;
-}
-
-.header-container h4 {
-  margin: 0;
-  font-weight: 400;
-  font-size: 0.95rem;
-  color: #777;
+.disclaimer {
   font-style: italic;
 }
-.credit a {
-  text-decoration: underline;
-  color: inherit; /* keeps your text color */
-}
 
+@media (max-width: 520px) {
+  .page {
+    padding: 18px 14px 32px;
+  }
 
-select {
-  padding: 5px;
-  padding-right: 35px;
-  background-color: white;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-  appearance: none; /* removes default OS arrow styling */
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23333' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
-}
-
-select:focus {
-  outline: none;
-  border-color: #3f51b5;
-  box-shadow: 0 0 3px rgba(63, 81, 181, 0.5);
-}
-
-option {
-  padding: 8px;
+  .context {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 @media print {
-  .container {
-    max-width: 90%;
-    margin: 12px 20px;
+  .page {
+    max-width: 100%;
     padding: 0;
-    border-radius: 0;
   }
 
+  .topbar-actions,
   .print-button {
     display: none;
   }
-}
-
-.print-button {
-  padding: 10px;
-  /* background-color: #3f51b5; */
-  /* color: white; */
-  border: 1px solid #3f51b5;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.print-button:hover {
-  background-color: #3f51b5;
-  color: white;
 }

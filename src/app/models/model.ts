@@ -94,3 +94,34 @@ export interface TaxModel {
   // Backup values
   exemptionBackup: number;
 }
+
+/* ---------------------------------------------------------------
+ * Analytics & chart data
+ * --------------------------------------------------------------- */
+
+export interface TaxAnalytics {
+  /** tax after rebate as a % of total income (the "average" / effective rate) */
+  effectiveRate: number;
+  /** tax after rebate as a % of income after exemption */
+  effectiveRateOnTaxable: number;
+  /** highest slab rate the income actually reaches */
+  marginalRate: number;
+  /** net income as a % of total income */
+  takeHomeRate: number;
+  /** rebate actually knocked off the slab tax */
+  rebateApplied: number;
+  /** investment needed to claim the rebate in full */
+  investRequired: number;
+  monthlyTDS: number;
+  netMonthly: number;
+  netAnnual: number;
+  /** true when the floor (minimum tax) decided the payable amount */
+  minTaxApplied: boolean;
+}
+
+export interface CurvePoint {
+  x: number;
+  y: number;
+  /** effective rate at this point, % */
+  rate: number;
+}

@@ -1,38 +1,59 @@
-<div class="container">
-  <div class="header-container">
-    <h3>Tax Calculator (Private Company)</h3>
-    <h4>Assessment Year:
-      <select [(ngModel)]="selectedAy" (change)="onAyChange()">
-        @for (input of ayOptions; track input.value) {
-          <option [value]="input.value">{{ input.label }}</option>
-        }
-      </select>
-    </h4>
-    @if (selectedAy == AY.AY_2025_2026) {
-      <h4>Income Year: <b>01-07-24 to 30-06-25</b></h4>
-    } @else if (selectedAy == AY.AY_2026_2027) {
-      <h4>Income Year: <b>01-07-25 to 30-06-26</b></h4>
-    }
+<div class="page">
 
-  </div>
-
-
-  <app-ay25-26 [ay]="selectedAy"></app-ay25-26>
-
-
-  <div class="credit">
-    <div>
-      <span class="copyright-icon">©</span>
-      <a href="https://www.linkedin.com/in/zahid-hassan-2342a2217/" target="_blank">Zahid Hassan</a>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><i class="pi pi-calculator"></i></span>
+      <div>
+        <h1>Tax Calculator</h1>
+        <p>Salaried employees &middot; Private company &middot; Bangladesh</p>
+      </div>
     </div>
-    <div>
-      <button class="print-button" (click)="print()">
+
+    <div class="topbar-actions">
+      <button type="button" class="btn-ghost" (click)="toggleTheme()"
+              [attr.aria-label]="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+              [title]="isDark ? 'Light theme' : 'Dark theme'">
+        @if (isDark) {
+          <i class="pi pi-sun"></i>
+        } @else {
+          <i class="pi pi-moon"></i>
+        }
+      </button>
+      <button type="button" class="btn-ghost print-button" (click)="print()"
+              aria-label="Print or save as PDF" title="Print">
         <i class="pi pi-print"></i>
       </button>
     </div>
+  </header>
+
+  <div class="context">
+    <label class="ay-field">
+      <span>Assessment year</span>
+      <select [(ngModel)]="selectedAy" (change)="onAyChange()">
+        @for (input of ayOptions; track input.value) {
+          <option [ngValue]="input.value">{{ input.label }}</option>
+        }
+      </select>
+    </label>
+
+    <span class="income-year">
+      Income year
+      @if (selectedAy == AY.AY_2025_2026) {
+        <b>01-07-24 to 30-06-25</b>
+      } @else if (selectedAy == AY.AY_2026_2027) {
+        <b>01-07-25 to 30-06-26</b>
+      }
+    </span>
   </div>
 
+  <app-ay25-26 [ay]="selectedAy"></app-ay25-26>
+
+  <footer class="credit">
+    <span>
+      <span class="copyright-icon">&copy;</span>
+      <a href="https://www.linkedin.com/in/zahid-hassan-2342a2217/" target="_blank" rel="noopener">Zahid Hassan</a>
+    </span>
+    <span class="disclaimer">Indicative figures only &mdash; confirm with NBR rules before filing.</span>
+  </footer>
+
 </div>
-
-
-

@@ -1,105 +1,278 @@
+/* ---------- input form ---------- */
 
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: bold;
-  color: #444;
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
-input, p-inputnumber {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  background-color: white;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #3f51b5;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-2);
+}
+
+@media (max-width: 520px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- result tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 1;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-button:hover {
-  background-color: #2c3e9f;
+.tab i {
+  font-size: 0.8rem;
 }
 
-.results {
-  margin-top: 20px;
-  background: #fff;
-  padding: 15px;
-  border-radius: 5px;
-  border: 1px solid #eee;
+.tab:hover {
+  color: var(--text-1);
 }
 
-.results p {
-  margin: 8px 0;
-  font-size: 15px;
+.tab--active {
+  background: var(--surface);
+  color: var(--text-1);
+  box-shadow: var(--shadow);
 }
 
-.results-table td.value {
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tab-panel--hidden {
+  display: none;
+}
+
+/* ---------- hero summary ---------- */
+
+.hero-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  border-color: var(--accent-ring);
+  background: var(--accent-wash);
+}
+
+.hero-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.hero {
+  margin-top: 4px;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text-1);
+}
+
+.hero-cur {
+  margin-right: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  vertical-align: 0.55rem;
+  color: var(--text-2);
+}
+
+.hero-note {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+.hero-side {
+  display: grid;
+  grid-template-columns: auto;
+  gap: 1px 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
   text-align: right;
-  font-weight: bold;
-  color: #2c3e9f;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-side strong {
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--text-1);
+}
+
+.hero-side-label {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.hero-side strong:last-child {
+  margin-bottom: 0;
+}
+
+.chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chip--warn {
+  background: var(--warn-wash);
+  color: var(--warn-ink);
+}
+
+@media (max-width: 520px) {
+  .hero {
+    font-size: 2.1rem;
+  }
+
+  .hero-side {
+    padding-left: 0;
+    border-left: 0;
+    text-align: left;
+  }
+}
+
+/* ---------- breakdown ---------- */
+
+.breakdown > summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--text-1);
+}
+
+.breakdown > summary::marker {
+  color: var(--muted);
+}
+
+.tax-results {
+  margin-top: 6px;
 }
 
 .results-table {
   width: 100%;
-  font-size: 14px;
+  margin-top: 18px;
   border-collapse: collapse;
-  margin-top: 5px;
+  font-size: 0.82rem;
+  color: var(--text-2);
 }
 
 .results-table td {
-  padding: 6px 10px;
-  /*border-bottom: 1px solid #f1f1f1;*/
+  padding: 7px 10px;
 }
+
+.results-table td.value {
+  text-align: right;
+  font-weight: 650;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.results-table td.value--soft {
+  font-weight: 400;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
 .results-table td i {
-  color: #0ea8d5;
+  color: var(--muted);
+  font-style: italic;
 }
 
-
-select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  background-color: white;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  font-size: 16px;
-  color: #333;
-  appearance: none; /* removes default OS arrow styling */
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23333' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
+.slab-table {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-select:focus {
-  outline: none;
-  border-color: #3f51b5;
-  box-shadow: 0 0 3px rgba(63, 81, 181, 0.5);
+.slab-table .table-caption {
+  padding-bottom: 2px;
+  color: var(--text-1);
 }
 
-option {
-  padding: 8px;
+.slab-table .head-row td {
+  padding-top: 2px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--grid);
+}
+
+.slab-table tr:not(.head-row):not(.total-row) td {
+  border-bottom: 1px solid var(--grid);
+  font-variant-numeric: tabular-nums;
+}
+
+.slab-table .total-row td {
+  color: var(--text-1);
+  background: var(--surface-2);
+  font-variant-numeric: tabular-nums;
 }
 
 @media print {
-  .calculation-input {
+  .inputs,
+  .tabs {
     display: none;
   }
+
+  /* print carries both tabs, whichever one is on screen */
+  .tab-panel,
+  .tab-panel--hidden {
+    display: flex;
+  }
+
   .tax-results {
-    width: 100%;
     page-break-inside: avoid;
-    page-break-after: auto;
   }
 }

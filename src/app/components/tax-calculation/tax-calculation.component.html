@@ -1,130 +1,265 @@
-<div class="calculation-input">
-  <label>Calculation Input</label>
-  <select [(ngModel)]="taxModel.calcInput" (change)="isShow = false">
-    @for (input of taxModel.CALC_INPUT_OPTIONS; track input.value) {
-      <option [value]="input.value">{{ input.label }}</option>
+<section class="card inputs" aria-label="Calculation inputs">
+  <div class="field-grid">
+
+    <label class="field field--wide">
+      <span class="field-label">Calculation input</span>
+      <select [ngModel]="taxModel.calcInput" (ngModelChange)="onCalcInputChange($event)">
+        @for (input of taxModel.CALC_INPUT_OPTIONS; track input.value) {
+          <option [ngValue]="input.value">{{ input.label }}</option>
+        }
+      </select>
+    </label>
+
+    @if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
+      <label class="field">
+        <span class="field-label">Monthly salary</span>
+        <p-inputnumber inputId="monthlySalary" [ngModel]="monthlySalary"
+                       (ngModelChange)="onMonthlySalaryChange($event)"
+                       placeholder="e.g. 60,000" locale="en-IN"></p-inputnumber>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Total yearly bonus</span>
+        <p-inputnumber inputId="festivalBonus" [ngModel]="festivalBonus"
+                       (ngModelChange)="onFestivalBonusChange($event)"
+                       placeholder="e.g. 72,000" locale="en-IN"></p-inputnumber>
+      </label>
+    } @else if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.TOTAL_INCOME) {
+      <label class="field field--wide">
+        <span class="field-label">Total income with bonus (yearly)</span>
+        <p-inputnumber inputId="totalIncome" [ngModel]="totalIncome"
+                       (ngModelChange)="onTotalIncomeChange($event)"
+                       placeholder="e.g. 8,00,000" locale="en-IN"></p-inputnumber>
+      </label>
+    } @else {
+      <label class="field field--wide">
+        <span class="field-label">Total income after exemption</span>
+        <p-inputnumber inputId="totalIncomeSlab" [ngModel]="totalIncome"
+                       (ngModelChange)="onTotalIncomeChange($event)"
+                       placeholder="e.g. 6,00,000" locale="en-IN"></p-inputnumber>
+      </label>
     }
-  </select>
 
-  @if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
-    <label>Monthly Salary</label>
-    <p-inputnumber inputId="integeronly" [(ngModel)]="monthlySalary" (keyup)="isShow = false;calcFestival()"
-                  placeholder="Enter monthly salary" locale="en-IN"></p-inputnumber>
+    <label class="field">
+      <span class="field-label">Tax free limit</span>
+      <select [ngModel]="taxModel.taxFreeLimit" (ngModelChange)="onTaxFreeLimitChange($event)">
+        @for (input of taxModel.TAX_FREE_LIMIT_OPTIONS; track input.value) {
+          <option [ngValue]="input.value">{{ input.label }}</option>
+        }
+      </select>
+    </label>
 
-    <label>Total Bonus</label>
-    <p-inputnumber inputId="integeronly" [(ngModel)]="festivalBonus" (keyup)="isShow = false"
-                  placeholder="Enter festival salary" locale="en-IN"></p-inputnumber>
+    <label class="field">
+      <span class="field-label">Minimum tax</span>
+      <select [ngModel]="taxModel.minTax" (ngModelChange)="onMinTaxChange($event)">
+        @for (input of taxModel.MIN_TAX_OPTIONS; track input.value) {
+          <option [ngValue]="input.value">{{ input.label }}</option>
+        }
+      </select>
+    </label>
 
-  } @else if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.TOTAL_INCOME) {
-    <label>Total Income With Bonus (yearly)</label>
-    <p-inputnumber inputId="integeronly" [(ngModel)]="totalIncome" (keyup)="isShow = false;"
-                  placeholder="Enter total income" locale="en-IN"></p-inputnumber>
-  } @else{
-    <label>Total Income After Exemption</label>
-    <p-inputnumber inputId="integeronly" [(ngModel)]="totalIncome" (keyup)="isShow = false;"
-                  placeholder="Enter total income" locale="en-IN"></p-inputnumber>
-  }
-
-  <label>Tax Free Limit</label>
-  <select [(ngModel)]="taxModel.taxFreeLimit" (change)="isShow = false">
-    @for (input of taxModel.TAX_FREE_LIMIT_OPTIONS; track input.value) {
-      <option [value]="input.value">
-        {{ input.label }}
-      </option>
-    }
-  </select>
-
-  <label>Minimum Tax</label>
-  <select [(ngModel)]="taxModel.minTax" (change)="isShow = false">
-    @for (input of taxModel.MIN_TAX_OPTIONS; track input.value) {
-      <option [value]="input.value">
-        {{ input.label }}
-      </option>
-    }
-  </select>
-
-  <button type="submit" style="margin-top: 20px" (click)="calculate()">Calculate</button>
-</div>
+  </div>
+</section>
 
 @if (isShow && totalIncome > 0) {
-  <div class="tax-results">
-    <table class="results-table">
-      <tr>
-        <td>a. Total Income With Bonus</td>
-        <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
-      </tr>
-      <tr>
-        <td>b. Exemption <i>(1/3 of a) max: 5 lakh</i></td>
-        <td class="value">{{ formatIndianNumber(taxResult.exemption) }}</td>
-      </tr>
-      <tr>
-        <td>c. Total Income After Exemption <i>(a-b)</i></td>
-        <td class="value">{{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</td>
-      </tr>
 
-    </table>
-
-    <table class="results-table">
-      <tr>
-        <td colspan="3" style="color: #2c3e9f; font-style: italic;"><b>Slab Breakdown of ({{formatIndianNumber(taxResult.totalIncomeAfterExemption)}}) :</b></td>
-      </tr>
-      <tr>
-        <td style="width: 40%;">Amount</td>
-        <td style="text-align: center; width: 20%">Rate</td>
-        <td style="text-align: right; width: 40%">Tax</td>
-      </tr>
-      @for (slab of taxResult.slabBreakDown; track slab.rate) {
-        <tr>
-          @if(slab.rate == 0) {
-            <td>first {{ formatIndianNumber(slab.amount) }}</td>
-          } @else {
-            <td>next {{ formatIndianNumber(slab.amount) }}</td>
-          }
-
-          <td style="text-align: center">{{ slab.rate }} %</td>
-          <td style="text-align: right">{{ formatIndianNumber(slab.tax) }}</td>
-        </tr>
-      }
-
-      <tr>
-        <td style="color: #2c3e9f;"><b>Total: {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b></td>
-        <td></td>
-        <td style="text-align: right;color: #2c3e9f;"><b> Tax: {{ formatIndianNumber(taxResult.totalTax) }}</b></td>
-      </tr>
-    </table>
-
-    <table style="margin-top: 20px" class="results-table">
-      <tr>
-        <td>d. Tax Without Rebate <i>(slab of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }})</i></td>
-        <td class="value">{{ formatIndianNumber(taxResult.totalTax) }}</td>
-      </tr>
-      <tr>
-        <td>e. Max Rebate <i>(3% of c) max: {{formatIndianNumber(taxModel.MAX_REBATE)}}</i></td>
-        <td class="value">{{ formatIndianNumber(taxResult.maxRebate) }}</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="value" style="font-weight: normal;font-size: 13px"><i>( Required Investment: <b>{{ formatIndianNumber(taxResult.investRequired) }} )</b></i></td>
-      </tr>
-      <tr>
-        <td>f. Tax After Max Rebate <i>(d-e)</i></td>
-        <td class="value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</td>
-      </tr>
-
-        @if (taxModel.calcInput == taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
-          <tr>
-            <td>g. Monthly TDS <i>(f/12)</i></td>
-            <td class="value">{{ formatIndianNumber(taxResult.monthlyTDS) }}</td>
-          </tr>
-          <tr>
-            <td>h. Monthly Salary After TDS</td>
-            <td class="value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</td>
-          </tr>
+  <section class="card hero-card" aria-label="Summary">
+    <div>
+      <span class="hero-label">Tax payable for the year</span>
+      <div class="hero">
+        <span class="hero-cur">Tk</span>{{ formatIndianNumber(taxResult.taxAfterRebate) }}
+      </div>
+      <p class="hero-note">
+        {{ percent(analytics.effectiveRate) }}% of Tk {{ formatIndianNumber(totalIncome) }} total income
+        @if (analytics.minTaxApplied) {
+          <span class="chip chip--warn">Minimum tax floor applied</span>
         }
+      </p>
+    </div>
+    @if (showMonthlyCharts) {
+      <div class="hero-side">
+        <span class="hero-side-label">Monthly TDS</span>
+        <strong>Tk {{ formatIndianNumber(analytics.monthlyTDS) }}</strong>
+        <span class="hero-side-label">Take home / month</span>
+        <strong>Tk {{ formatIndianNumber(analytics.netMonthly) }}</strong>
+      </div>
+    }
+  </section>
 
-    </table>
+  <div class="tabs" role="tablist" aria-label="Results view">
+    <button type="button" role="tab" class="tab" id="tab-breakdown"
+            [class.tab--active]="activeTab === 'breakdown'"
+            [attr.aria-selected]="activeTab === 'breakdown'"
+            aria-controls="panel-breakdown"
+            (click)="activeTab = 'breakdown'">
+      <i class="pi pi-list"></i> Breakdown
+    </button>
+    <button type="button" role="tab" class="tab" id="tab-analytics"
+            [class.tab--active]="activeTab === 'analytics'"
+            [attr.aria-selected]="activeTab === 'analytics'"
+            aria-controls="panel-analytics"
+            (click)="activeTab = 'analytics'">
+      <i class="pi pi-chart-line"></i> Analytics
+    </button>
+  </div>
+
+  <!-- ---------------- Breakdown ---------------- -->
+  <div class="tab-panel" id="panel-breakdown" role="tabpanel" aria-labelledby="tab-breakdown"
+       [class.tab-panel--hidden]="activeTab !== 'breakdown'">
+    <section class="card breakdown">
+      <div class="tax-results">
+        <table class="results-table">
+          <tr>
+            <td>a. Total Income With Bonus</td>
+            <td class="value">{{ formatIndianNumber(totalIncome) }}</td>
+          </tr>
+          <tr>
+            <td>b. Exemption <i>(1/3 of a) max: 5 lakh</i></td>
+            <td class="value">{{ formatIndianNumber(taxResult.exemption) }}</td>
+          </tr>
+          <tr>
+            <td>c. Total Income After Exemption <i>(a-b)</i></td>
+            <td class="value">{{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</td>
+          </tr>
+        </table>
+
+        <table class="results-table slab-table">
+          <tr>
+            <td colspan="3" class="table-caption">
+              <b>Slab breakdown of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b>
+            </td>
+          </tr>
+          <tr class="head-row">
+            <td style="width: 40%;">Amount</td>
+            <td style="text-align: center; width: 20%">Rate</td>
+            <td style="text-align: right; width: 40%">Tax</td>
+          </tr>
+          @for (slab of taxResult.slabBreakDown; track slab.rate) {
+            <tr>
+              @if (slab.rate == 0) {
+                <td>first {{ formatIndianNumber(slab.amount) }}</td>
+              } @else {
+                <td>next {{ formatIndianNumber(slab.amount) }}</td>
+              }
+              <td style="text-align: center">{{ slab.rate }} %</td>
+              <td style="text-align: right">{{ formatIndianNumber(slab.tax) }}</td>
+            </tr>
+          }
+          <tr class="total-row">
+            <td><b>Total: {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</b></td>
+            <td></td>
+            <td style="text-align: right"><b>Tax: {{ formatIndianNumber(taxResult.totalTax) }}</b></td>
+          </tr>
+        </table>
+
+        <table class="results-table">
+          <tr>
+            <td>d. Tax Without Rebate <i>(slab of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }})</i></td>
+            <td class="value">{{ formatIndianNumber(taxResult.totalTax) }}</td>
+          </tr>
+          <tr>
+            <td>e. Max Rebate <i>(3% of c) max: {{ formatIndianNumber(taxModel.MAX_REBATE) }}</i></td>
+            <td class="value">{{ formatIndianNumber(taxResult.maxRebate) }}</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="value value--soft"><i>( Required Investment:
+              <b>{{ formatIndianNumber(taxResult.investRequired) }} )</b></i></td>
+          </tr>
+          <tr>
+            <td>f. Tax After Max Rebate <i>(d-e)</i></td>
+            <td class="value">{{ formatIndianNumber(taxResult.taxAfterRebate) }}</td>
+          </tr>
+
+          @if (taxModel.calcInput == taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
+            <tr>
+              <td>g. Monthly TDS <i>(f/12)</i></td>
+              <td class="value">{{ formatIndianNumber(taxResult.monthlyTDS) }}</td>
+            </tr>
+            <tr>
+              <td>h. Monthly Salary After TDS</td>
+              <td class="value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</td>
+            </tr>
+          }
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ---------------- Analytics ---------------- -->
+  <div class="tab-panel" id="panel-analytics" role="tabpanel" aria-labelledby="tab-analytics"
+       [class.tab-panel--hidden]="activeTab !== 'analytics'">
+
+    <div class="tile-grid">
+      <app-stat-tile
+        label="Effective tax rate"
+        [value]="percent(analytics.effectiveRate)" unit="%"
+        [meter]="analytics.effectiveRate / 30"
+        hint="Average rate across your whole income"></app-stat-tile>
+
+      <app-stat-tile
+        label="Rate after exemption"
+        [value]="percent(analytics.effectiveRateOnTaxable)" unit="%"
+        [meter]="analytics.effectiveRateOnTaxable / 30"
+        hint="After the exemption is deducted"></app-stat-tile>
+
+      <app-stat-tile
+        label="Marginal slab rate"
+        [value]="analytics.marginalRate" unit="%"
+        [meter]="analytics.marginalRate / 30"
+        hint="Rate on your next taka earned"></app-stat-tile>
+
+      <app-stat-tile
+        label="Take home"
+        [value]="percent(analytics.takeHomeRate)" unit="%"
+        [meter]="analytics.takeHomeRate / 100"
+        [hint]="'Tk ' + formatIndianNumber(analytics.netAnnual) + ' for the year'"></app-stat-tile>
+
+      <app-stat-tile
+        label="Taxable income"
+        [value]="'Tk ' + formatIndianNumber(taxResult.totalIncomeAfterExemption)"
+        [hint]="'After Tk ' + formatIndianNumber(taxResult.exemption) + ' exemption'"></app-stat-tile>
+
+      <app-stat-tile
+        label="Rebate saved"
+        [value]="'Tk ' + formatIndianNumber(analytics.rebateApplied)"
+        [hint]="'Needs Tk ' + formatIndianNumber(analytics.investRequired) + ' invested'"></app-stat-tile>
+
+      <app-stat-tile
+        label="Monthly TDS"
+        [value]="'Tk ' + formatIndianNumber(analytics.monthlyTDS)"
+        hint="Tax after rebate divided by 12"></app-stat-tile>
+
+      @if (showMonthlyCharts) {
+        <app-stat-tile
+          label="Net monthly pay"
+          [value]="'Tk ' + formatIndianNumber(analytics.netMonthly)"
+          hint="Base salary less monthly TDS"></app-stat-tile>
+      }
+    </div>
+
+    @if (showMonthlyCharts) {
+      <section class="card">
+        <app-line-chart
+          title="Monthly salary vs monthly tax"
+          subtitle="How your TDS moves if the salary changes, same settings"
+          xLabel="Monthly salary"
+          [series]="salarySeries"
+          [marker]="salaryMarker"
+          markerLabel="You"
+          [h]="250"></app-line-chart>
+      </section>
+    }
+
+    <section class="card">
+      <app-line-chart
+        title="Total income vs tax"
+        subtitle="Yearly tax payable across income levels, same exemption and rebate settings"
+        xLabel="Total income"
+        [series]="incomeSeries"
+        [marker]="incomeMarker"
+        markerLabel="You"
+        [h]="250"></app-line-chart>
+    </section>
   </div>
 }
-
-
-

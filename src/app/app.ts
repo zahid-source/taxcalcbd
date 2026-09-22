@@ -1,8 +1,8 @@
-import {Component, signal} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalculation} from './components/tax-calculation/tax-calculation.component';
 import {AY, AY_OPTIONS} from './models/model';
-
+import {ThemeService} from './services/theme-service';
 
 @Component({
   selector: 'app-root',
@@ -10,16 +10,23 @@ import {AY, AY_OPTIONS} from './models/model';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-
-
 export class App {
-  // protected readonly title = signal('tax-calculator');
   AY: typeof AY = AY;
   selectedAy = AY_OPTIONS[AY_OPTIONS.length - 1].value;
   ayOptions = AY_OPTIONS;
 
+  readonly themeService = inject(ThemeService);
+
+  get isDark(): boolean {
+    return this.themeService.theme() === 'dark';
+  }
+
+  toggleTheme() {
+    this.themeService.toggle();
+  }
+
   onAyChange() {
-    console.log(this.selectedAy);
+    // model is reloaded by the child component through ngOnChanges
   }
 
   print() {

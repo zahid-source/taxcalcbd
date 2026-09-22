@@ -1,18 +1,25 @@
 import {Component, Input} from '@angular/core';
-import {InputNumber} from "primeng/inputnumber";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {InputNumber} from 'primeng/inputnumber';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalcService} from '../../services/tax-calc-service';
 
-import {AY, AY_VALUE, TaxModel, TaxResult} from '../../models/model';
+import {AY, AY_VALUE, CurvePoint, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
 import {TAX_MODEL_25_26} from '../../models/ay25-26.model';
 import {TAX_MODEL_26_27} from '../../models/ay26-27.model';
+import {LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
+import {StatTileComponent} from '../stat-tile/stat-tile.component';
+import {groupedNumber} from '../charts/chart-utils';
+
+type ResultTab = 'breakdown' | 'analytics';
 
 @Component({
   selector: 'app-ay25-26',
   imports: [
     InputNumber,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    LineChartComponent,
+    StatTileComponent
   ],
   templateUrl: './tax-calculation.component.html',
   styleUrl: './tax-calculation.component.css'
@@ -29,14 +36,24 @@ export class TaxCalculation {
   totalIncome: number = 0;
 
   taxResult!: TaxResult;
+  analytics!: TaxAnalytics;
   isShow: boolean = false;
 
+  activeTab: ResultTab = 'breakdown';
+
+  // chart data
+  showMonthlyCharts = false;
+  salarySeries: LineSeries[] = [];
+  salaryMarker: LinePoint | null = null;
+  incomeSeries: LineSeries[] = [];
+  incomeMarker: LinePoint | null = null;
+
   ngOnChanges() {
-    this.isShow = false;
     if (!this.ay) {
       throw new Error('AY not provided!');
     }
     this.initializeFromModel();
+    this.calculate();
   }
 
   private initializeFromModel() {
@@ -55,23 +72,66 @@ export class TaxCalculation {
 
   }
 
+  /* ---------------------------------------------------------------
+   * Live input handlers - every change recalculates immediately
+   * --------------------------------------------------------------- */
+
+  onMonthlySalaryChange(value: number | null) {
+    this.monthlySalary = value ?? 0;
+    this.calcFestival();
+    this.calculate();
+  }
+
+  onFestivalBonusChange(value: number | null) {
+    this.festivalBonus = value ?? 0;
+    this.calculate();
+  }
+
+  onTotalIncomeChange(value: number | null) {
+    this.totalIncome = value ?? 0;
+    this.calculate();
+  }
+
+  onCalcInputChange(value: string) {
+    // values carry over where two modes share a field
+    this.taxModel.calcInput = value;
+    this.calculate();
+  }
+
+  onTaxFreeLimitChange(value: number) {
+    this.taxModel.taxFreeLimit = value;
+    this.calculate();
+  }
+
+  onMinTaxChange(value: number) {
+    this.taxModel.minTax = value;
+    this.calculate();
+  }
+
   calculate() {
 
     this.handleCalcInput();
 
-    this.taxResult = TaxCalcService.calculateTax({
-      totalIncome: this.totalIncome,
-      taxFreeLimit: this.taxModel.taxFreeLimit,
-      minTax: this.taxModel.minTax,
+    if (!this.totalIncome || this.totalIncome <= 0) {
+      this.isShow = false;
+      return;
+    }
+
+    const input: TaxInput = {
+      totalIncome: Number(this.totalIncome) || 0,
+      taxFreeLimit: Number(this.taxModel.taxFreeLimit),
+      minTax: Number(this.taxModel.minTax),
       slabs: this.taxModel.SLAB,
       exemptionRate: this.taxModel.EXEMPTION_RATE,
       maxExemption: this.taxModel.MAX_EXEMPTION,
       rebateRateOnTaxableIncome: this.taxModel.REBATE_RATE_ON_TAXABLE_INCOME,
       rebateRateOnActualInvestment: this.taxModel.REBATE_RATE_ON_ACTUAL_INVESTMENT,
-      maxRebate: this.taxModel.MAX_REBATE,
-    });
+      maxRebate: this.taxModel.MAX_REBATE
+    };
 
-    console.log(this.taxResult);
+    this.taxResult = TaxCalcService.calculateTax(input);
+    this.analytics = TaxCalcService.buildAnalytics(input, this.taxResult, this.monthlySalary);
+    this.buildCharts(input);
     this.isShow = true;
   }
 
@@ -90,13 +150,56 @@ export class TaxCalculation {
     }
   }
 
+  /* ---------------------------------------------------------------
+   * Charts
+   * --------------------------------------------------------------- */
+
+  private buildCharts(input: TaxInput) {
+    const isMonthlyMode = this.taxModel.calcInput == this.taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY;
+    this.showMonthlyCharts = isMonthlyMode && this.monthlySalary > 0;
+
+    if (this.showMonthlyCharts) {
+      const bonusRatio = this.monthlySalary > 0 ? this.festivalBonus / this.monthlySalary : 0;
+      const curve = TaxCalcService.buildSalaryCurve(input, this.monthlySalary, bonusRatio, 36);
+      this.salarySeries = [{
+        name: 'Monthly tax',
+        color: 'var(--series-2)',
+        points: this.withCurrentPoint(curve, this.monthlySalary, this.taxResult.monthlyTDS)
+      }];
+      this.salaryMarker = {x: this.monthlySalary, y: this.taxResult.monthlyTDS};
+    } else {
+      this.salarySeries = [];
+      this.salaryMarker = null;
+    }
+
+    const incomeCurve = TaxCalcService.buildIncomeCurve(input, 36);
+    this.incomeSeries = [{
+      name: 'Yearly tax',
+      color: 'var(--series-1)',
+      points: this.withCurrentPoint(incomeCurve, input.totalIncome, this.taxResult.taxAfterRebate)
+    }];
+    this.incomeMarker = {x: input.totalIncome, y: this.taxResult.taxAfterRebate};
+  }
+
+  /** Makes sure the drawn curve passes exactly through the user's own figures. */
+  private withCurrentPoint(curve: CurvePoint[], x: number, y: number): LinePoint[] {
+    const points: LinePoint[] = curve.map(p => ({x: p.x, y: p.y}));
+    points.push({x, y});
+    points.sort((a, b) => a.x - b.x);
+    return points;
+  }
+
+  /* ---------------------------------------------------------------
+   * Formatting helpers
+   * --------------------------------------------------------------- */
+
   formatIndianNumber(amount: number): string {
-    const amt = Math.round(amount).toString();
-    if (amt.length <= 3) return amt;
-    const last3 = amt.slice(-3);
-    let rest = amt.slice(0, -3);
-    rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
-    return rest + ',' + last3;
+    return groupedNumber(amount);
+  }
+
+  percent(value: number): string {
+    if (!isFinite(value)) return '0.0';
+    return (Math.round(value * 10) / 10).toFixed(1);
   }
 
   calcFestival() {
