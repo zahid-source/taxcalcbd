@@ -295,8 +295,8 @@
     @if (showMonthlyCharts) {
       <section class="card">
         <app-line-chart
-          title="Monthly salary vs TDS"
-          subtitle="How your TDS moves if the salary changes, same settings"
+          title="Monthly Salary vs TDS"
+          subtitle="How your TDS increase if the salary changes"
           xLabel="Monthly salary"
           [series]="salarySeries"
           [marker]="salaryMarker"
@@ -307,8 +307,8 @@
 
     <section class="card">
       <app-line-chart
-        title="Total income vs Tax"
-        subtitle="Slab tax and what is left to pay after the rebate, across income levels"
+        title="Yearly Income vs Tax"
+        subtitle="How your Total Tax increase if the Yearly income changes"
         xLabel="Total income"
         [series]="incomeSeries"
         [marker]="incomeMarker"
