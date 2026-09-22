@@ -8,6 +8,7 @@ import {TAX_MODEL_25_26} from '../../models/ay25-26.model';
 import {TAX_MODEL_26_27} from '../../models/ay26-27.model';
 import {LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
 import {StatTileComponent} from '../stat-tile/stat-tile.component';
+import {SelectComponent, SelectOption} from '../ui/select.component';
 import {groupedNumber} from '../charts/chart-utils';
 
 type ResultTab = 'calculation' | 'analytics';
@@ -20,7 +21,8 @@ type IncomeMeasure = 'AFTER_REBATE' | 'TOTAL_TAX';
     ReactiveFormsModule,
     FormsModule,
     LineChartComponent,
-    StatTileComponent
+    StatTileComponent,
+    SelectComponent
   ],
   templateUrl: './tax-calculation.component.html',
   styleUrl: './tax-calculation.component.css'
@@ -54,7 +56,7 @@ export class TaxCalculation {
 
   /** what the "total income vs ..." chart plots */
   incomeMeasure: IncomeMeasure = 'AFTER_REBATE';
-  readonly INCOME_MEASURE_OPTIONS = [
+  readonly INCOME_MEASURE_OPTIONS: SelectOption[] = [
     {label: 'Tax after max rebate', value: 'AFTER_REBATE'},
     {label: 'Total tax', value: 'TOTAL_TAX'}
   ];

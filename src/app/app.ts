@@ -3,10 +3,11 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalculation} from './components/tax-calculation/tax-calculation.component';
 import {AY, AY_OPTIONS} from './models/model';
 import {ThemeService} from './services/theme-service';
+import {SelectComponent} from './components/ui/select.component';
 
 @Component({
   selector: 'app-root',
-  imports: [ReactiveFormsModule, FormsModule, TaxCalculation],
+  imports: [ReactiveFormsModule, FormsModule, TaxCalculation, SelectComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -25,8 +26,9 @@ export class App {
     this.themeService.toggle();
   }
 
-  onAyChange() {
-    // model is reloaded by the child component through ngOnChanges
+  onAyChange(value: string) {
+    // the child component reloads its model through ngOnChanges
+    this.selectedAy = value;
   }
 
   print() {

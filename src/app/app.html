@@ -27,14 +27,11 @@
   </header>
 
   <div class="context">
-    <label class="ay-field">
-      <span>Assessment year</span>
-      <select [(ngModel)]="selectedAy" (change)="onAyChange()">
-        @for (input of ayOptions; track input.value) {
-          <option [ngValue]="input.value">{{ input.label }}</option>
-        }
-      </select>
-    </label>
+    <app-select class="ay-field"
+                label="Assessment year"
+                [options]="ayOptions"
+                [value]="selectedAy"
+                (valueChange)="onAyChange($event)"></app-select>
 
     <span class="income-year">
       Income year

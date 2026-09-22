@@ -1,14 +1,11 @@
 <section class="card inputs" aria-label="Calculation inputs">
   <div class="field-grid">
 
-    <label class="field field--wide">
-      <span class="field-label">Calculation input</span>
-      <select [ngModel]="taxModel.calcInput" (ngModelChange)="onCalcInputChange($event)">
-        @for (input of taxModel.CALC_INPUT_OPTIONS; track input.value) {
-          <option [ngValue]="input.value">{{ input.label }}</option>
-        }
-      </select>
-    </label>
+    <app-select class="field--wide"
+                label="Calculation input"
+                [options]="taxModel.CALC_INPUT_OPTIONS"
+                [value]="taxModel.calcInput"
+                (valueChange)="onCalcInputChange($event)"></app-select>
 
     @if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
       <label class="field">
@@ -40,23 +37,15 @@
       </label>
     }
 
-    <label class="field">
-      <span class="field-label">Tax free limit</span>
-      <select [ngModel]="taxModel.taxFreeLimit" (ngModelChange)="onTaxFreeLimitChange($event)">
-        @for (input of taxModel.TAX_FREE_LIMIT_OPTIONS; track input.value) {
-          <option [ngValue]="input.value">{{ input.label }}</option>
-        }
-      </select>
-    </label>
+    <app-select label="Tax free limit"
+                [options]="taxModel.TAX_FREE_LIMIT_OPTIONS"
+                [value]="taxModel.taxFreeLimit"
+                (valueChange)="onTaxFreeLimitChange($event)"></app-select>
 
-    <label class="field">
-      <span class="field-label">Minimum tax</span>
-      <select [ngModel]="taxModel.minTax" (ngModelChange)="onMinTaxChange($event)">
-        @for (input of taxModel.MIN_TAX_OPTIONS; track input.value) {
-          <option [ngValue]="input.value">{{ input.label }}</option>
-        }
-      </select>
-    </label>
+    <app-select label="Minimum tax"
+                [options]="taxModel.MIN_TAX_OPTIONS"
+                [value]="taxModel.minTax"
+                (valueChange)="onMinTaxChange($event)"></app-select>
 
   </div>
 </section>
@@ -340,12 +329,12 @@
         [marker]="incomeMarker"
         markerLabel="You"
         [h]="250">
-        <select chart-control class="chart-select" aria-label="Measure plotted against total income"
-                [ngModel]="incomeMeasure" (ngModelChange)="onIncomeMeasureChange($event)">
-          @for (option of INCOME_MEASURE_OPTIONS; track option.value) {
-            <option [ngValue]="option.value">{{ option.label }}</option>
-          }
-        </select>
+        <app-select chart-control
+                    [inline]="true"
+                    ariaLabel="Measure plotted against total income"
+                    [options]="INCOME_MEASURE_OPTIONS"
+                    [value]="incomeMeasure"
+                    (valueChange)="onIncomeMeasureChange($event)"></app-select>
       </app-line-chart>
     </section>
   </div>

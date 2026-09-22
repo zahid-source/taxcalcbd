@@ -64,6 +64,8 @@ app-ay25-26 {
 /* ---------- assessment year row ---------- */
 
 .context {
+  /* the notched label has to sit on the page plane, not a card */
+  --field-bg: var(--page);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -73,25 +75,7 @@ app-ay25-26 {
 }
 
 .ay-field {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.ay-field > span {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-2);
-  white-space: nowrap;
-}
-
-.ay-field select {
-  width: auto;
-  min-width: 140px;
-  padding-top: 7px;
-  padding-bottom: 7px;
-  font-weight: 600;
+  min-width: 190px;
 }
 
 .income-year {
