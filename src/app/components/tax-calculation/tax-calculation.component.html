@@ -56,7 +56,7 @@
     <div class="hero-row">
       <div class="hero-flow">
         <div class="hero-step">
-          <span class="hero-step-label">Total tax</span>
+          <span class="hero-step-label">Slab TAX</span>
           <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.totalTax) }}</span>
         </div>
       </div>
@@ -101,7 +101,7 @@
         <span class="step-num">1</span>
         <div>
           <h4>Taxable income</h4>
-          <p>What is left after the exemption comes off your total income</p>
+          <p>Taxable income calculation</p>
         </div>
       </header>
 
@@ -140,7 +140,7 @@
         <span class="step-num">2</span>
         <div>
           <h4>Slab breakdown</h4>
-          <p>Each slice of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }} is taxed at its own rate</p>
+          <p>Slab breakdown of {{ formatIndianNumber(taxResult.totalIncomeAfterExemption) }}</p>
         </div>
       </header>
 
@@ -155,7 +155,7 @@
       <table class="slab-table">
         <thead>
           <tr>
-            <th class="col-slab">Income slice</th>
+            <th class="col-slab">Slab</th>
             <th class="col-rate">Rate</th>
             <th class="col-tax">Tax</th>
           </tr>
@@ -188,7 +188,7 @@
         <span class="step-num">3</span>
         <div>
           <h4>Tax payable</h4>
-          <p>The investment rebate comes off the slab tax</p>
+          <p>Rebate calculation</p>
         </div>
       </header>
 
@@ -204,7 +204,7 @@
         <div class="eq-item">
           <span class="eq-label">Max Rebate</span>
           <span class="eq-value">{{ formatIndianNumber(taxResult.maxRebate) }}</span>
-          <span class="eq-note">3% of taxable income, max {{ formatIndianNumber(taxModel.MAX_REBATE) }}
+          <span class="eq-note">3% of taxable income, capped at {{ formatIndianNumber(taxModel.MAX_REBATE) }}
             <br> Required investment <b>{{ formatIndianNumber(taxResult.investRequired) }}</b></span>
         </div>
 
@@ -216,7 +216,7 @@
           @if (analytics.minTaxApplied) {
             <span class="eq-note">Minimum tax floor of {{ formatIndianNumber(taxModel.minTax) }} applied</span>
           } @else {
-            <span class="eq-note">{{ percent(analytics.effectiveRate) }}% of total income</span>
+            <span class="eq-note">Tax payable after max rebate</span>
           }
         </div>
       </div>
@@ -230,7 +230,7 @@
           <span class="step-num">4</span>
           <div>
             <h4>Monthly Salary</h4>
-            <p>The year's tax is deducted in twelve equal parts</p>
+            <p>Monthly Salary calculation</p>
           </div>
         </header>
 
@@ -254,7 +254,7 @@
           <div class="eq-item eq-item--result eq-item--final">
             <span class="eq-label">Salary after TDS</span>
             <span class="eq-value">{{ formatIndianNumber(monthlySalary - taxResult.monthlyTDS) }}</span>
-            <span class="eq-note">In hand each month</span>
+            <span class="eq-note">Salary after TDS deduction</span>
           </div>
         </div>
       </section>
@@ -276,7 +276,7 @@
         label="Current Slab"
         [value]="analytics.marginalRate" unit="%"
         [meter]="analytics.marginalRate / 30"
-        hint="Rate on your next taka earned"></app-stat-tile>
+        hint="Current tax slab"></app-stat-tile>
 
       <app-stat-tile
         label="Taxable income"

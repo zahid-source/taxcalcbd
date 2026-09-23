@@ -134,7 +134,8 @@ export class TaxCalcService {
 
   /** Yearly tax payable as total income varies, all other settings held fixed. */
   static buildIncomeCurve(base: TaxInput, steps: number = 40): CurvePoint[] {
-    const max = Math.max(base.totalIncome * 2, 3000000);
+    let max = Math.min(base.totalIncome * 2, base.totalIncome + 2000000);
+    max = Math.max(max, 90000*13.2)
     const points: CurvePoint[] = [];
     for (let i = 0; i <= steps; i++) {
       const totalIncome = Math.round((max * i) / steps);
@@ -151,7 +152,8 @@ export class TaxCalcService {
 
   /** Monthly TDS as the monthly salary varies, keeping the same bonus-to-salary ratio. */
   static buildSalaryCurve(base: TaxInput, monthlySalary: number, bonusRatio: number, steps: number = 40): CurvePoint[] {
-    const max = Math.max(monthlySalary * 2, 150000);
+    let max = Math.min(monthlySalary * 2, monthlySalary + 200000);
+    max = Math.max(max, 90000)
     const points: CurvePoint[] = [];
     for (let i = 0; i <= steps; i++) {
       const salary = Math.round((max * i) / steps);
