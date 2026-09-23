@@ -152,6 +152,21 @@ export class TaxCalculation implements OnInit, OnDestroy {
     this.calculate();
   }
 
+  onDisabledChildrenChange(value: number) {
+    this.taxModel.disabledChildren = value;
+    this.calculate();
+  }
+
+  /** the limit the slabs actually start from, once the child allowance is added */
+  get effectiveTaxFreeLimit(): number {
+    return Number(this.taxModel.taxFreeLimit)
+      + Number(this.taxModel.disabledChildren || 0) * Number(this.taxModel.DISABLED_CHILD_ALLOWANCE);
+  }
+
+  get childAllowance(): number {
+    return Number(this.taxModel.disabledChildren || 0) * Number(this.taxModel.DISABLED_CHILD_ALLOWANCE);
+  }
+
   onMinTaxChange(value: number) {
     this.taxModel.minTax = value;
     this.calculate();
@@ -168,7 +183,7 @@ export class TaxCalculation implements OnInit, OnDestroy {
 
     const input: TaxInput = {
       totalIncome: Number(this.totalIncome) || 0,
-      taxFreeLimit: Number(this.taxModel.taxFreeLimit),
+      taxFreeLimit: this.effectiveTaxFreeLimit,
       minTax: Number(this.taxModel.minTax),
       slabs: this.taxModel.SLAB,
       exemptionRate: this.taxModel.EXEMPTION_RATE,

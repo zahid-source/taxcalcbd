@@ -1,4 +1,4 @@
-import {TaxModel} from './model';
+import {DISABLED_CHILD_OPTIONS, TaxModel} from './model';
 
 export const TAX_MODEL_25_26: TaxModel = {
   // Dropdown options
@@ -8,6 +8,8 @@ export const TAX_MODEL_25_26: TaxModel = {
     {label: '4,75,000 (Person with Disability / Third Gender)', value: 475000},
     {label: '5,00,000 (Freedom Fighter)', value: 500000}
   ],
+
+  DISABLED_CHILD_OPTIONS: DISABLED_CHILD_OPTIONS,
 
   CALC_INPUT_OPTIONS: [
     {label: 'Monthly Salary', value: 'MONTHLY_SALARY'},
@@ -27,6 +29,7 @@ export const TAX_MODEL_25_26: TaxModel = {
   REBATE_RATE_ON_TAXABLE_INCOME: 0.03,
   REBATE_RATE_ON_ACTUAL_INVESTMENT: 0.15,
   MAX_REBATE: 1000000,
+  DISABLED_CHILD_ALLOWANCE: 50000,
   SLAB: [
     {limit: 100000, rate: 5},
     {limit: 400000, rate: 10},
@@ -56,6 +59,7 @@ export const TAX_MODEL_25_26: TaxModel = {
 
   // User input selections (default values)
   taxFreeLimit: 350000,
+  disabledChildren: 0,
   calcInput: 'MONTHLY_SALARY',
   minTax: 5000,
 

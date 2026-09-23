@@ -194,6 +194,10 @@ export class App implements OnInit {
     });
   }
 
+  get childAllowanceLabel(): string {
+    return 'Tk ' + groupedNumber(this.taxModel.DISABLED_CHILD_ALLOWANCE);
+  }
+
   get exemptionSummary(): string {
     const model = this.taxModel;
     return Math.round(model.EXEMPTION_RATE * 100) + '% of total income, up to Tk '

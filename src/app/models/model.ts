@@ -82,9 +82,20 @@ export function incomeYearOf(ay: AY_VALUE | string): string {
 }
 
 
+/**
+ * A parent or legal guardian of a child with a disability gets a higher tax
+ * free limit - the same list serves every assessment year.
+ */
+export const DISABLED_CHILD_OPTIONS: SelectItem[] = [
+  {label: 'N/A', value: 0},
+  {label: '1 child', value: 1},
+  {label: '2 children', value: 2}
+];
+
 export interface TaxModel {
   // Dropdown options
   TAX_FREE_LIMIT_OPTIONS: SelectItem[];
+  DISABLED_CHILD_OPTIONS: SelectItem[];
   CALC_INPUT_OPTIONS: SelectItem[];
   MIN_TAX_OPTIONS: SelectItem[];
 
@@ -94,6 +105,8 @@ export interface TaxModel {
   REBATE_RATE_ON_TAXABLE_INCOME: number;
   REBATE_RATE_ON_ACTUAL_INVESTMENT: number;
   MAX_REBATE: number;
+  /** added to the tax free limit for each child with a disability */
+  DISABLED_CHILD_ALLOWANCE: number;
   SLAB: Slab[];
 
   // Enums
@@ -103,6 +116,7 @@ export interface TaxModel {
 
   // User input selections
   taxFreeLimit: number;
+  disabledChildren: number;
   calcInput: string;
   minTax: number;
 

@@ -42,6 +42,12 @@
                 [value]="taxModel.taxFreeLimit"
                 (valueChange)="onTaxFreeLimitChange($event)"></app-select>
 
+    <app-select label="Child with disability"
+                ariaLabel="Children with a disability"
+                [options]="taxModel.DISABLED_CHILD_OPTIONS"
+                [value]="taxModel.disabledChildren"
+                (valueChange)="onDisabledChildrenChange($event)"></app-select>
+
     <app-select label="Minimum tax"
                 [options]="taxModel.MIN_TAX_OPTIONS"
                 [value]="taxModel.minTax"
