@@ -54,7 +54,7 @@ export class App implements OnInit {
   }
 
   get showInstallButton(): boolean {
-    return !this.runningStandalone;
+    return !this.runningStandalone && !this.installed;
   }
 
   get isIos(): boolean {
@@ -81,11 +81,6 @@ export class App implements OnInit {
 
 
   async install() {
-    // already installed - hand over to the app rather than explaining how to install
-    if (this.installed && !this.installPrompt) {
-      this.openApp();
-      return;
-    }
     if (!this.installPrompt) {
       // Safari and Firefox never raise a prompt - the browser menu does it
       this.showIosHelp = true;
@@ -98,10 +93,6 @@ export class App implements OnInit {
     if (choice.outcome === 'accepted') this.installed = true;
   }
 
-  /** the installed app claims its own scope, so this link opens it */
-  private openApp() {
-    window.open(window.location.origin + '/', '_blank');
-  }
 
   readonly themeService = inject(ThemeService);
 
