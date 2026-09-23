@@ -141,6 +141,26 @@ export class TaxCalculation implements OnInit, OnDestroy {
     this.calculate();
   }
 
+  /** icon and one-liner for each calculation input card */
+  private static readonly CALC_INPUT_CARDS: Record<string, { icon: string; hint: string }> = {
+    MONTHLY_SALARY: {icon: 'pi-wallet', hint: 'Salary per month, with yearly bonus'},
+    TOTAL_INCOME: {icon: 'pi-calendar', hint: 'Whole year, salary and bonus together'},
+    ONLY_SLAB: {icon: 'pi-percentage', hint: 'Income already after exemption'}
+  };
+
+  get calcInputCards(): { value: string; label: string; icon: string; hint: string }[] {
+    return this.taxModel.CALC_INPUT_OPTIONS.map(option => {
+      const value = String(option.value);
+      const card = TaxCalculation.CALC_INPUT_CARDS[value];
+      return {
+        value,
+        label: String(option.label ?? value),
+        icon: card?.icon ?? 'pi-calculator',
+        hint: card?.hint ?? ''
+      };
+    });
+  }
+
   onCalcInputChange(value: string) {
     // values carry over where two modes share a field
     this.taxModel.calcInput = value;

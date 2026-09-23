@@ -1,11 +1,18 @@
 <section class="card inputs" aria-label="Calculation inputs">
-  <div class="field-grid">
 
-    <app-select class="field--wide"
-                label="Calculation input"
-                [options]="taxModel.CALC_INPUT_OPTIONS"
-                [value]="taxModel.calcInput"
-                (valueChange)="onCalcInputChange($event)"></app-select>
+  <div class="mode-cards" role="radiogroup" aria-label="Calculation input">
+    @for (card of calcInputCards; track card.value) {
+      <button type="button" class="mode-card" role="radio"
+              [class.mode-card--on]="taxModel.calcInput === card.value"
+              [attr.aria-checked]="taxModel.calcInput === card.value"
+              (click)="onCalcInputChange(card.value)">
+        <i class="pi {{ card.icon }}" aria-hidden="true"></i>
+        <span class="mode-card-label">{{ card.label }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="field-grid">
 
     @if (taxModel.calcInput === taxModel.CALC_INPUT_ENUM.MONTHLY_SALARY) {
       <label class="field">

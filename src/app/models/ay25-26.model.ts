@@ -13,8 +13,8 @@ export const TAX_MODEL_25_26: TaxModel = {
 
   CALC_INPUT_OPTIONS: [
     {label: 'Monthly Salary', value: 'MONTHLY_SALARY'},
-    {label: 'Total Income (yearly)', value: 'TOTAL_INCOME'},
-    {label: 'Only Slab Calculator', value: 'ONLY_SLAB'}
+    {label: 'Yearly Income', value: 'TOTAL_INCOME'},
+    {label: 'Slab Calculator', value: 'ONLY_SLAB'}
   ],
 
   MIN_TAX_OPTIONS: [

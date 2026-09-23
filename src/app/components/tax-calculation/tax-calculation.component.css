@@ -1,5 +1,82 @@
 /* ---------- input form ---------- */
 
+.mode-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.mode-card i {
+  flex: none;
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+.mode-card-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+
+.mode-card:hover {
+  border-color: var(--input-border-hover);
+  background: var(--surface);
+}
+
+.mode-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mode-card--on,
+.mode-card--on:hover {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.mode-card--on i {
+  color: var(--accent);
+}
+
+@media (max-width: 560px) {
+  .mode-cards {
+    gap: 5px;
+  }
+
+  .mode-card {
+    gap: 5px;
+    padding: 11px 6px 10px;
+  }
+
+  .mode-card i {
+    font-size: 0.92rem;
+  }
+
+  .mode-card-label {
+    font-size: 0.72rem;
+  }
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
