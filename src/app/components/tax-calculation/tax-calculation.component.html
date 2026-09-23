@@ -355,7 +355,7 @@
 }
 
 @if (keyboardOpen) {
-  <div class="keyboard-done">
+  <div class="keyboard-done" [style.bottom.px]="keyboardInset + 12">
     <button type="button" class="btn-ghost"
             (pointerdown)="$event.preventDefault()"
             (click)="dismissKeyboard()">

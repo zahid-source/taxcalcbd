@@ -462,9 +462,10 @@
   .keyboard-done {
     position: fixed;
     right: 14px;
-    bottom: calc(14px + env(safe-area-inset-bottom));
+    /* the inline bottom lifts it clear of the keyboard */
     z-index: 50;
     display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .keyboard-done .btn-ghost {

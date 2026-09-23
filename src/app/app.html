@@ -19,11 +19,12 @@
           <i class="pi pi-moon"></i>
         }
       </button>
-      @if (canInstall) {
+      @if (showInstallButton) {
         <button type="button" class="btn-ghost install-button" (click)="install()"
-                aria-label="Install as app" title="Install as app">
-          <i class="pi pi-download"></i>
-          <span class="install-label">Install</span>
+                [attr.aria-label]="installed ? 'Open the app' : 'Install as app'"
+                [title]="installed ? 'Open the app' : 'Install as app'">
+          <i class="pi" [class.pi-download]="!installed" [class.pi-external-link]="installed"></i>
+          <span class="install-label">{{ installed ? 'Open app' : 'Install' }}</span>
         </button>
       }
       <button type="button" class="btn-ghost print-button" (click)="print()"
@@ -128,18 +129,16 @@
           </table>
 
           <h3 class="rate-sub">Exemption &amp; rebate</h3>
-          <table class="rate-table">
-            <tbody>
-              <tr>
-                <td>Exemption</td>
-                <td class="col-rate">{{ exemptionSummary }}</td>
-              </tr>
-              <tr>
-                <td>Investment rebate</td>
-                <td class="col-rate">{{ rebateSummary }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <dl class="rate-facts">
+            <div>
+              <dt>Exemption</dt>
+              <dd>{{ exemptionSummary }}</dd>
+            </div>
+            <div>
+              <dt>Investment rebate</dt>
+              <dd>{{ rebateSummary }}</dd>
+            </div>
+          </dl>
 
           <p class="rate-note">Slab ranges assume the base tax free limit; a higher limit shifts
             every band up by the difference.</p>

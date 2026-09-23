@@ -240,11 +240,65 @@ app-ay25-26 {
   font-weight: 600;
 }
 
+/* the constants read as wrapping text, not as a table that forces a scroll */
+
+.rate-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.rate-facts div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+}
+
+.rate-facts dt {
+  flex: none;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--text-1);
+}
+
+.rate-facts dd {
+  margin: 0;
+  flex: 1 1 180px;
+  min-width: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
 .rate-note {
   margin: 16px 0 0;
   font-size: 0.72rem;
   line-height: 1.45;
   color: var(--muted);
+}
+
+@media (max-width: 480px) {
+  .modal-body {
+    padding: 14px 14px 18px;
+  }
+
+  .rate-table {
+    font-size: 0.74rem;
+  }
+
+  .rate-table th,
+  .rate-table td {
+    padding: 7px 8px;
+  }
+
+  .rate-table .col-band,
+  .rate-table .col-rate {
+    white-space: normal;
+  }
 }
 
 /* ---------- install as app ---------- */

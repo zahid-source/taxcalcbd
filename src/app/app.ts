@@ -1,4 +1,4 @@
-import {Component, HostListener, inject} from '@angular/core';
+import {Component, HostListener, OnInit, inject} from '@angular/core';
 import {SelectItem} from 'primeng/api';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalculation} from './components/tax-calculation/tax-calculation.component';
@@ -24,7 +24,7 @@ interface RateOption {
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   AY: typeof AY = AY;
   selectedAy: AY_VALUE = AY.AY_2027_2028;
   ayOptions = AY_OPTIONS;
@@ -34,13 +34,27 @@ export class App {
 
   /** install-as-app state */
   private installPrompt: InstallPromptEvent | null = null;
-  installed = typeof window !== 'undefined'
+  /** the page itself is the installed app - nothing to offer */
+  readonly runningStandalone = typeof window !== 'undefined'
     && (window.matchMedia('(display-mode: standalone)').matches
       || (window.navigator as { standalone?: boolean }).standalone === true);
+  /** installed, but this tab is the browser one */
+  installed = false;
   showIosHelp = false;
 
-  get canInstall(): boolean {
-    return !this.installed;
+  async ngOnInit() {
+    if (this.runningStandalone) return;
+    const nav = navigator as Navigator & { getInstalledRelatedApps?: () => Promise<unknown[]> };
+    if (!nav.getInstalledRelatedApps) return;
+    try {
+      this.installed = (await nav.getInstalledRelatedApps()).length > 0;
+    } catch {
+      // the check is a nicety - the install prompt still decides
+    }
+  }
+
+  get showInstallButton(): boolean {
+    return !this.runningStandalone;
   }
 
   get isIos(): boolean {
@@ -65,7 +79,13 @@ export class App {
     this.installed = true;
   }
 
+
   async install() {
+    // already installed - hand over to the app rather than explaining how to install
+    if (this.installed && !this.installPrompt) {
+      this.openApp();
+      return;
+    }
     if (!this.installPrompt) {
       // Safari and Firefox never raise a prompt - the browser menu does it
       this.showIosHelp = true;
@@ -76,6 +96,11 @@ export class App {
     await prompt.prompt();
     const choice = await prompt.userChoice;
     if (choice.outcome === 'accepted') this.installed = true;
+  }
+
+  /** the installed app claims its own scope, so this link opens it */
+  private openApp() {
+    window.open(window.location.origin + '/', '_blank');
   }
 
   readonly themeService = inject(ThemeService);

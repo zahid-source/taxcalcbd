@@ -1,4 +1,4 @@
-import {Component, HostListener, Input} from '@angular/core';
+import {Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
 import {InputNumber} from 'primeng/inputnumber';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalcService} from '../../services/tax-calc-service';
@@ -26,7 +26,7 @@ type ResultTab = 'calculation' | 'analytics';
   templateUrl: './tax-calculation.component.html',
   styleUrl: './tax-calculation.component.css'
 })
-export class TaxCalculation {
+export class TaxCalculation implements OnInit, OnDestroy {
 
   @Input() ay!: AY_VALUE;
 
@@ -60,11 +60,41 @@ export class TaxCalculation {
 
   /** true while a number field holds focus - drives the mobile "Done" button */
   keyboardOpen = false;
+  /** how much of the layout viewport the on-screen keyboard covers */
+  keyboardInset = 0;
+
+  private readonly onViewportChange = () => this.measureKeyboard();
+
+  ngOnInit() {
+    window.visualViewport?.addEventListener('resize', this.onViewportChange);
+    window.visualViewport?.addEventListener('scroll', this.onViewportChange);
+  }
+
+  ngOnDestroy() {
+    window.visualViewport?.removeEventListener('resize', this.onViewportChange);
+    window.visualViewport?.removeEventListener('scroll', this.onViewportChange);
+  }
+
+  /**
+   * iOS keeps the layout viewport full height when the keyboard opens, so a
+   * fixed element sits behind it - the visual viewport is what tells us where
+   * the keyboard starts.
+   */
+  private measureKeyboard() {
+    const viewport = window.visualViewport;
+    if (!viewport) {
+      this.keyboardInset = 0;
+      return;
+    }
+    const covered = window.innerHeight - (viewport.height + viewport.offsetTop);
+    this.keyboardInset = Math.max(0, Math.round(covered));
+  }
 
   @HostListener('document:focusin', ['$event'])
   onFocusIn(event: FocusEvent) {
     const target = event.target as HTMLElement | null;
     this.keyboardOpen = target?.tagName === 'INPUT';
+    if (this.keyboardOpen) this.measureKeyboard();
   }
 
   @HostListener('document:focusout')

@@ -6,7 +6,7 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f9f9f7",
+  "background_color": "#0cc27c",
   "theme_color": "#f9f9f7",
   "icons": [
     {
@@ -26,6 +26,16 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "/manifest.webmanifest"
     }
   ]
 }
