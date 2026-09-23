@@ -8,6 +8,11 @@ import {groupedNumber} from './components/charts/chart-utils';
 import {ThemeService} from './services/theme-service';
 import {SelectComponent} from './components/ui/select.component';
 
+interface InstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 interface RateOption {
   amount: string;
   name: string;
@@ -26,6 +31,52 @@ export class App {
 
   /** the slab / tax-free-limit reference panel */
   showRates = false;
+
+  /** install-as-app state */
+  private installPrompt: InstallPromptEvent | null = null;
+  installed = typeof window !== 'undefined'
+    && (window.matchMedia('(display-mode: standalone)').matches
+      || (window.navigator as { standalone?: boolean }).standalone === true);
+  showIosHelp = false;
+
+  get canInstall(): boolean {
+    return !this.installed && (this.installPrompt !== null || this.isIos);
+  }
+
+  get isIos(): boolean {
+    if (typeof navigator === 'undefined') return false;
+    const ua = navigator.userAgent;
+    // iPadOS reports itself as a Mac, so the touch points settle it
+    const iOsDevice = /iPad|iPhone|iPod/.test(ua)
+      || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    return iOsDevice && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  }
+
+  @HostListener('window:beforeinstallprompt', ['$event'])
+  onBeforeInstallPrompt(event: InstallPromptEvent) {
+    // keep the event so the button can raise the prompt later
+    event.preventDefault();
+    this.installPrompt = event;
+  }
+
+  @HostListener('window:appinstalled')
+  onAppInstalled() {
+    this.installPrompt = null;
+    this.installed = true;
+  }
+
+  async install() {
+    if (!this.installPrompt) {
+      // iOS has no install prompt - it is a menu item in Safari
+      this.showIosHelp = true;
+      return;
+    }
+    const prompt = this.installPrompt;
+    this.installPrompt = null;
+    await prompt.prompt();
+    const choice = await prompt.userChoice;
+    if (choice.outcome === 'accepted') this.installed = true;
+  }
 
   readonly themeService = inject(ThemeService);
 
@@ -117,8 +168,9 @@ export class App {
   }
 
   @HostListener('document:keydown.escape')
-  closeRates() {
+  closeOverlays() {
     this.showRates = false;
+    this.showIosHelp = false;
   }
 
   toggleTheme() {

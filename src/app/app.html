@@ -19,6 +19,13 @@
           <i class="pi pi-moon"></i>
         }
       </button>
+      @if (canInstall) {
+        <button type="button" class="btn-ghost install-button" (click)="install()"
+                aria-label="Install as app" title="Install as app">
+          <i class="pi pi-download"></i>
+          <span class="install-label">Install</span>
+        </button>
+      }
       <button type="button" class="btn-ghost print-button" (click)="print()"
               aria-label="Print or save as PDF" title="Print">
         <i class="pi pi-print"></i>
@@ -136,6 +143,31 @@
 
           <p class="rate-note">Slab ranges assume the base tax free limit; a higher limit shifts
             every band up by the difference.</p>
+        </div>
+      </section>
+    </div>
+  }
+
+  @if (showIosHelp) {
+    <div class="modal-backdrop" (click)="showIosHelp = false">
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="ios-title"
+               (click)="$event.stopPropagation()">
+        <header class="rate-head">
+          <div>
+            <h2 id="ios-title">Install on iPhone</h2>
+            <p>Safari adds it to your home screen</p>
+          </div>
+          <button type="button" class="btn-ghost" (click)="showIosHelp = false" aria-label="Close">
+            <i class="pi pi-times"></i>
+          </button>
+        </header>
+
+        <div class="modal-body">
+          <ol class="install-steps">
+            <li>Tap <b>Share</b> in the Safari toolbar.</li>
+            <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+            <li>Tap <b>Add</b> - the calculator opens like an app, offline too.</li>
+          </ol>
         </div>
       </section>
     </div>
