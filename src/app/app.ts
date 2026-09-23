@@ -21,7 +21,7 @@ interface RateOption {
 })
 export class App {
   AY: typeof AY = AY;
-  selectedAy: string = AY.AY_2027_2028;
+  selectedAy: AY_VALUE = AY.AY_2027_2028;
   ayOptions = AY_OPTIONS;
 
   /** the slab / tax-free-limit reference panel */
@@ -34,7 +34,7 @@ export class App {
   }
 
   get taxModel() {
-    return taxModelOf(this.selectedAy as AY_VALUE);
+    return taxModelOf(this.selectedAy);
   }
 
   /** the rate card for the selected AY - zero band first, then every slab */
@@ -125,7 +125,7 @@ export class App {
     this.themeService.toggle();
   }
 
-  onAyChange(value: string) {
+  onAyChange(value: AY_VALUE) {
     // the child component reloads its model through ngOnChanges
     this.selectedAy = value;
   }
