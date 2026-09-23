@@ -3,9 +3,9 @@ import {InputNumber} from 'primeng/inputnumber';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalcService} from '../../services/tax-calc-service';
 
-import {AY, AY_VALUE, SlabRow, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
+import {AY_VALUE, SlabRow, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
 import {TAX_MODEL_25_26} from '../../models/ay25-26.model';
-import {TAX_MODEL_26_27} from '../../models/ay26-27.model';
+import {taxModelOf} from '../../models/tax-model-registry';
 import {ChartExtra, LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
 import {StatTileComponent} from '../stat-tile/stat-tile.component';
 import {SelectComponent} from '../ui/select.component';
@@ -67,19 +67,8 @@ export class TaxCalculation {
   }
 
   private initializeFromModel() {
-
     // Load the correct model based on AY
-    switch (this.ay) {
-      case AY.AY_2025_2026:
-        this.taxModel = TAX_MODEL_25_26;
-        break;
-      case AY.AY_2026_2027:
-        this.taxModel = TAX_MODEL_26_27;
-        break;
-      default:
-        throw new Error('Unsupported AY');
-    }
-
+    this.taxModel = taxModelOf(this.ay);
   }
 
   /* ---------------------------------------------------------------

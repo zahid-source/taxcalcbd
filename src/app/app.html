@@ -27,21 +27,119 @@
   </header>
 
   <div class="context">
-    <app-select class="ay-field"
-                label="Assessment year"
-                [options]="ayOptions"
-                [value]="selectedAy"
-                (valueChange)="onAyChange($event)"></app-select>
+    <div class="context-main">
+      <app-select class="ay-field"
+                  label="Assessment year"
+                  [options]="ayOptions"
+                  [value]="selectedAy"
+                  (valueChange)="onAyChange($event)"></app-select>
+
+      <button type="button" class="btn-ghost rates-btn" (click)="showRates = !showRates"
+              [attr.aria-expanded]="showRates" aria-controls="rate-reference"
+              title="Slab rates and tax free limits">
+        <i class="pi pi-table"></i> Slab Rate
+      </button>
+    </div>
 
     <span class="income-year">
-      Income year
-      @if (selectedAy == AY.AY_2025_2026) {
-        <b>01-07-24 to 30-06-25</b>
-      } @else if (selectedAy == AY.AY_2026_2027) {
-        <b>01-07-25 to 30-06-26</b>
-      }
+      Income year <b>{{ incomeYear }}</b>
     </span>
   </div>
+
+  @if (showRates) {
+    <div class="modal-backdrop" (click)="showRates = false">
+      <section class="modal rate-ref" id="rate-reference" role="dialog" aria-modal="true"
+               aria-labelledby="rate-title" (click)="$event.stopPropagation()">
+        <header class="rate-head">
+          <div>
+            <h2 id="rate-title">Slab rate</h2>
+            <p>AY {{ selectedAy }} &middot; income year {{ incomeYear }}</p>
+          </div>
+          <button type="button" class="btn-ghost" (click)="showRates = false" aria-label="Close">
+            <i class="pi pi-times"></i>
+          </button>
+        </header>
+
+        <div class="modal-body">
+          <h3 class="rate-sub">Slab</h3>
+          <table class="rate-table">
+            <thead>
+              <tr>
+                <th class="col-band">Slab</th>
+                <th class="col-range">Range</th>
+                <th class="col-rate">Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rateRows; track $index) {
+                <tr [class.rate-row--free]="row.rate === 0">
+                  <td class="col-band">
+                    <span class="rate-swatch" [style.background]="row.color" aria-hidden="true"></span>
+                    {{ row.label }}
+                  </td>
+                  <td class="col-range">{{ row.range }}</td>
+                  <td class="col-rate">{{ row.rate }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <h3 class="rate-sub">Tax free limit</h3>
+          <table class="rate-table">
+            <thead>
+              <tr>
+                <th>Applies to</th>
+                <th class="col-rate">Limit</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (option of limitOptions; track option.amount) {
+                <tr>
+                  <td>{{ option.name }}</td>
+                  <td class="col-rate">{{ option.amount }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <h3 class="rate-sub">Minimum tax</h3>
+          <table class="rate-table">
+            <thead>
+              <tr>
+                <th>Applies to</th>
+                <th class="col-rate">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (option of minTaxOptions; track option.amount) {
+                <tr>
+                  <td>{{ option.name }}</td>
+                  <td class="col-rate">{{ option.amount }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <h3 class="rate-sub">Exemption &amp; rebate</h3>
+          <table class="rate-table">
+            <tbody>
+              <tr>
+                <td>Exemption</td>
+                <td class="col-rate">{{ exemptionSummary }}</td>
+              </tr>
+              <tr>
+                <td>Investment rebate</td>
+                <td class="col-rate">{{ rebateSummary }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p class="rate-note">Slab ranges assume the base tax free limit; a higher limit shifts
+            every band up by the difference.</p>
+        </div>
+      </section>
+    </div>
+  }
 
   <app-ay25-26 [ay]="selectedAy"></app-ay25-26>
 

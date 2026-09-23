@@ -56,7 +56,11 @@ export interface RebateOutput {
 
 export const AY = {
   AY_2025_2026: '2025-2026',
-  AY_2026_2027: '2026-2027'
+  AY_2026_2027: '2026-2027',
+  AY_2027_2028: '2027-2028',
+  AY_2028_2029: '2028-2029',
+  AY_2029_2030: '2029-2030',
+  AY_2030_2031: '2030-2031'
 } as const;
 
 export type AY_VALUE = typeof AY[keyof typeof AY];
@@ -65,6 +69,17 @@ export const AY_OPTIONS: SelectItem[] = Object.entries(AY).map(([key, value]) =>
   label: value,
   value: value,
 }));
+
+/**
+ * Income year for an assessment year - it runs 01-07 to 30-06 of the two
+ * calendar years before the AY closes, e.g. AY 2026-2027 -> 01-07-25 to 30-06-26.
+ */
+export function incomeYearOf(ay: AY_VALUE | string): string {
+  const start = Number(String(ay).slice(0, 4));
+  if (!start) return '';
+  const yy = (year: number) => String(year % 100).padStart(2, '0');
+  return '01-07-' + yy(start - 1) + ' to 30-06-' + yy(start);
+}
 
 
 export interface TaxModel {
