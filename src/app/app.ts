@@ -39,22 +39,51 @@ export class App implements OnInit {
     && (window.matchMedia('(display-mode: standalone)').matches
       || (window.navigator as { standalone?: boolean }).standalone === true);
   /** installed, but this tab is the browser one */
-  installed = false;
+  installed = App.readInstalledFlag();
   showIosHelp = false;
 
+  private static readonly INSTALLED_KEY = 'taxcalc-installed';
+
+  private static readInstalledFlag(): boolean {
+    try {
+      return localStorage.getItem(App.INSTALLED_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
   async ngOnInit() {
-    if (this.runningStandalone) return;
+    if (this.runningStandalone) {
+      this.markInstalled();
+      return;
+    }
     const nav = navigator as Navigator & { getInstalledRelatedApps?: () => Promise<unknown[]> };
     if (!nav.getInstalledRelatedApps) return;
     try {
-      this.installed = (await nav.getInstalledRelatedApps()).length > 0;
+      if ((await nav.getInstalledRelatedApps()).length > 0) this.markInstalled();
     } catch {
       // the check is a nicety - the install prompt still decides
     }
   }
 
+  private markInstalled() {
+    this.installed = true;
+    this.installPrompt = null;
+    try {
+      localStorage.setItem(App.INSTALLED_KEY, '1');
+    } catch {
+      // private mode - the prompt check below still hides the button
+    }
+  }
+
+  /**
+   * Chromium raises beforeinstallprompt whenever the app can be installed and
+   * stays silent once it is, so the event is the signal. Safari never raises
+   * it at all, which is why iOS falls back to the how-to panel.
+   */
   get showInstallButton(): boolean {
-    return !this.runningStandalone && !this.installed;
+    if (this.runningStandalone || this.installed) return false;
+    return this.installPrompt !== null || this.isIos;
   }
 
   get isIos(): boolean {
@@ -75,8 +104,7 @@ export class App implements OnInit {
 
   @HostListener('window:appinstalled')
   onAppInstalled() {
-    this.installPrompt = null;
-    this.installed = true;
+    this.markInstalled();
   }
 
 
@@ -90,7 +118,7 @@ export class App implements OnInit {
     this.installPrompt = null;
     await prompt.prompt();
     const choice = await prompt.userChoice;
-    if (choice.outcome === 'accepted') this.installed = true;
+    if (choice.outcome === 'accepted') this.markInstalled();
   }
 
 
