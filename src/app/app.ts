@@ -54,25 +54,30 @@ export class App implements OnInit {
 
   async ngOnInit() {
     if (this.runningStandalone) {
-      this.markInstalled();
+      this.setInstalled(true);
       return;
     }
     const nav = navigator as Navigator & { getInstalledRelatedApps?: () => Promise<unknown[]> };
     if (!nav.getInstalledRelatedApps) return;
     try {
-      if ((await nav.getInstalledRelatedApps()).length > 0) this.markInstalled();
+      // this also clears the flag once the app is uninstalled again
+      this.setInstalled((await nav.getInstalledRelatedApps()).length > 0);
     } catch {
       // the check is a nicety - the install prompt still decides
     }
   }
 
-  private markInstalled() {
-    this.installed = true;
-    this.installPrompt = null;
+  private setInstalled(installed: boolean) {
+    this.installed = installed;
+    if (installed) this.installPrompt = null;
     try {
-      localStorage.setItem(App.INSTALLED_KEY, '1');
+      if (installed) {
+        localStorage.setItem(App.INSTALLED_KEY, '1');
+      } else {
+        localStorage.removeItem(App.INSTALLED_KEY);
+      }
     } catch {
-      // private mode - the prompt check below still hides the button
+      // private mode - the prompt check below still decides
     }
   }
 
@@ -97,14 +102,16 @@ export class App implements OnInit {
 
   @HostListener('window:beforeinstallprompt', ['$event'])
   onBeforeInstallPrompt(event: Event) {
-    // keep the event so the button can raise the prompt later
+    // the browser only raises this when the app is NOT installed, so any
+    // remembered install is stale - an uninstall lands here
     event.preventDefault();
+    this.setInstalled(false);
     this.installPrompt = event as InstallPromptEvent;
   }
 
   @HostListener('window:appinstalled')
   onAppInstalled() {
-    this.markInstalled();
+    this.setInstalled(true);
   }
 
 
@@ -118,7 +125,7 @@ export class App implements OnInit {
     this.installPrompt = null;
     await prompt.prompt();
     const choice = await prompt.userChoice;
-    if (choice.outcome === 'accepted') this.markInstalled();
+    if (choice.outcome === 'accepted') this.setInstalled(true);
   }
 
 
