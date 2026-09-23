@@ -353,3 +353,13 @@
     </section>
   </div>
 }
+
+@if (keyboardOpen) {
+  <div class="keyboard-done">
+    <button type="button" class="btn-ghost"
+            (pointerdown)="$event.preventDefault()"
+            (click)="dismissKeyboard()">
+      <i class="pi pi-check"></i> Done
+    </button>
+  </div>
+}

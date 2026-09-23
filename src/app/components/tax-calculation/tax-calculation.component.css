@@ -451,3 +451,29 @@
     page-break-inside: avoid;
   }
 }
+
+/* ---------- dismiss the mobile keyboard ---------- */
+
+.keyboard-done {
+  display: none;
+}
+
+@media (max-width: 620px) and (pointer: coarse) {
+  .keyboard-done {
+    position: fixed;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 50;
+    display: flex;
+  }
+
+  .keyboard-done .btn-ghost {
+    box-shadow: var(--shadow-pop);
+  }
+}
+
+@media print {
+  .keyboard-done {
+    display: none;
+  }
+}

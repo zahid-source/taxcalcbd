@@ -19,14 +19,20 @@ app-ay25-26 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 12px 16px;
+  /* the actions stay pinned top right, even when the title has to wrap */
+  flex-wrap: nowrap;
 }
 
 .brand {
   display: flex;
   align-items: center;
+  flex: 1 1 auto;
   gap: 12px;
+  min-width: 0;
+}
+
+.brand > div {
   min-width: 0;
 }
 
@@ -58,6 +64,8 @@ app-ay25-26 {
 
 .topbar-actions {
   display: flex;
+  flex: none;
+  align-self: flex-start;
   gap: 8px;
 }
 
@@ -76,8 +84,15 @@ app-ay25-26 {
 
 .context-main {
   display: flex;
-  align-items: center;
+  /* the button takes its height from the assessment year field beside it */
+  align-items: stretch;
   gap: 10px;
+}
+
+.rates-btn {
+  padding: 0 14px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .ay-field {
@@ -289,6 +304,14 @@ app-ay25-26 {
   .context {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .brand h1 {
+    font-size: 1rem;
+  }
+
+  .brand p {
+    font-size: 0.7rem;
   }
 }
 

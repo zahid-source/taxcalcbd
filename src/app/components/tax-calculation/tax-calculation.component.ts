@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, HostListener, Input} from '@angular/core';
 import {InputNumber} from 'primeng/inputnumber';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TaxCalcService} from '../../services/tax-calc-service';
@@ -57,6 +57,26 @@ export class TaxCalculation {
   /** effective rate at each curve point - tooltip only, never drawn */
   incomeExtras: ChartExtra[] = [];
 
+
+  /** true while a number field holds focus - drives the mobile "Done" button */
+  keyboardOpen = false;
+
+  @HostListener('document:focusin', ['$event'])
+  onFocusIn(event: FocusEvent) {
+    const target = event.target as HTMLElement | null;
+    this.keyboardOpen = target?.tagName === 'INPUT';
+  }
+
+  @HostListener('document:focusout')
+  onFocusOut() {
+    this.keyboardOpen = false;
+  }
+
+  /** blurring the field is what dismisses the on-screen keyboard */
+  dismissKeyboard() {
+    (document.activeElement as HTMLElement | null)?.blur();
+    this.keyboardOpen = false;
+  }
 
   ngOnChanges() {
     if (!this.ay) {
