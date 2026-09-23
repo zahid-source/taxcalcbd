@@ -6,7 +6,7 @@ import {TaxCalcService} from '../../services/tax-calc-service';
 import {AY, AY_VALUE, SlabRow, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
 import {TAX_MODEL_25_26} from '../../models/ay25-26.model';
 import {TAX_MODEL_26_27} from '../../models/ay26-27.model';
-import {LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
+import {ChartExtra, LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
 import {StatTileComponent} from '../stat-tile/stat-tile.component';
 import {SelectComponent} from '../ui/select.component';
 import {groupedNumber} from '../charts/chart-utils';
@@ -50,10 +50,12 @@ export class TaxCalculation {
   showMonthlyCharts = false;
   salarySeries: LineSeries[] = [];
   salaryMarker: LinePoint | null = null;
+  /** salary after TDS and the TDS rate at each curve point - tooltip only */
+  salaryExtras: ChartExtra[] = [];
   incomeSeries: LineSeries[] = [];
   incomeMarker: LinePoint | null = null;
   /** effective rate at each curve point - tooltip only, never drawn */
-  incomeRates: string[] = [];
+  incomeExtras: ChartExtra[] = [];
 
 
   ngOnChanges() {
@@ -201,15 +203,27 @@ export class TaxCalculation {
     if (this.showMonthlyCharts) {
       const bonusRatio = this.monthlySalary > 0 ? this.festivalBonus / this.monthlySalary : 0;
       const curve = TaxCalcService.buildSalaryCurve(input, this.monthlySalary, bonusRatio, 500);
+      const points = this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.y})),
+        this.monthlySalary, this.taxResult.monthlyTDS);
       this.salarySeries = [{
-        name: 'Monthly tax',
+        name: 'Monthly TDS',
         color: 'var(--series-2)',
-        points: this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.y})),
-          this.monthlySalary, this.taxResult.monthlyTDS)
+        points
       }];
+      this.salaryExtras = [
+        {
+          label: 'Salary after TDS',
+          values: points.map(p => groupedNumber(Math.max(0, p.x - p.y)))
+        },
+        {
+          label: 'TDS rate',
+          values: points.map(p => this.percent(p.x > 0 ? (p.y / p.x) * 100 : 0) + '%')
+        }
+      ];
       this.salaryMarker = {x: this.monthlySalary, y: this.taxResult.monthlyTDS};
     } else {
       this.salarySeries = [];
+      this.salaryExtras = [];
       this.salaryMarker = null;
     }
 
@@ -237,7 +251,10 @@ export class TaxCalculation {
         points: rows.map(r => ({x: r.x, y: r.afterRebate}))
       }
     ];
-    this.incomeRates = rows.map(r => this.percent(r.rate) + '%');
+    this.incomeExtras = [{
+      label: 'Effective tax rate',
+      values: rows.map(r => this.percent(r.rate) + '%')
+    }];
     this.incomeMarker = {x: input.totalIncome, y: this.taxResult.taxAfterRebate};
   }
 

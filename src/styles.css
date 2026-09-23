@@ -239,7 +239,7 @@ app-select {
 .field {
   position: relative;
   border: 1px solid var(--input-border);
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--field-bg, var(--surface));
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -284,9 +284,9 @@ app-select {
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  padding: 13px 14px;
+  padding: 10px 12px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 6px;
   background: none;
   color: var(--text-1);
   font-family: inherit;
@@ -372,13 +372,13 @@ app-select {
 
 .field--inline {
   display: inline-block;
-  border-radius: 9px;
+  border-radius: 6px;
   background: var(--surface-2);
 }
 
 .field--inline .field-trigger {
-  padding: 5px 10px;
-  border-radius: 9px;
+  padding: 4px 9px;
+  border-radius: 6px;
   font-size: 0.82rem;
   font-weight: 650;
 }
@@ -401,9 +401,9 @@ app-select {
 .p-inputnumber input,
 input.p-inputtext {
   width: 100%;
-  padding: 13px 14px;
+  padding: 10px 12px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 8px;
   background: none;
   color: var(--text-1);
   font-family: inherit;

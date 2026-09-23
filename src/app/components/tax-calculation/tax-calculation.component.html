@@ -267,6 +267,36 @@
 
     <div class="tile-grid">
       <app-stat-tile
+        label="Total income"
+        [value]="'Tk ' + formatIndianNumber(totalIncome)"
+        hint="Gross yearly income"></app-stat-tile>
+
+      <app-stat-tile
+        label="Exemption"
+        [value]="'Tk ' + formatIndianNumber(taxResult.exemption)"
+        hint="Deducted from total income"></app-stat-tile>
+
+      <app-stat-tile
+        label="Taxable income"
+        [value]="'Tk ' + formatIndianNumber(taxResult.totalIncomeAfterExemption)"
+        [hint]="'After Tk ' + formatIndianNumber(taxResult.exemption) + ' exemption'"></app-stat-tile>
+
+      <app-stat-tile
+        label="Slab Tax"
+        [value]="'Tk ' + formatIndianNumber(taxResult.totalTax)"
+        hint="Tax before rebate"></app-stat-tile>
+
+      <app-stat-tile
+        label="Max Rebate"
+        [value]="'Tk ' + formatIndianNumber(taxResult.maxRebate)"
+        [hint]="'Tk ' + formatIndianNumber(analytics.rebateApplied) + ' applied'"></app-stat-tile>
+
+      <app-stat-tile
+        label="Tax payable after Rebate"
+        [value]="'Tk ' + formatIndianNumber(taxResult.taxAfterRebate)"
+        [hint]="analytics.minTaxApplied ? 'Minimum tax applied' : 'Slab tax less rebate'"></app-stat-tile>
+
+      <app-stat-tile
         label="Effective tax rate"
         [value]="percent(analytics.effectiveRate)" unit="%"
         [meter]="analytics.effectiveRate / 30"
@@ -278,15 +308,19 @@
         [meter]="analytics.marginalRate / 30"
         hint="Current tax slab"></app-stat-tile>
 
-      <app-stat-tile
-        label="Taxable income"
-        [value]="'Tk ' + formatIndianNumber(taxResult.totalIncomeAfterExemption)"
-        [hint]="'After Tk ' + formatIndianNumber(taxResult.exemption) + ' exemption'"></app-stat-tile>
-
-
       @if (showMonthlyCharts) {
         <app-stat-tile
-          label="Monthly Salary after TDS"
+          label="Monthly salary"
+          [value]="'Tk ' + formatIndianNumber(monthlySalary)"
+          hint="Base monthly salary"></app-stat-tile>
+
+        <app-stat-tile
+          label="Monthly TDS"
+          [value]="'Tk ' + formatIndianNumber(analytics.monthlyTDS)"
+          hint="Tax payable divided by 12"></app-stat-tile>
+
+        <app-stat-tile
+          label="Salary after TDS"
           [value]="'Tk ' + formatIndianNumber(analytics.netMonthly)"
           hint="Base salary less monthly TDS"></app-stat-tile>
       }
@@ -299,6 +333,7 @@
           subtitle="How your TDS increase if the salary changes"
           xLabel="Monthly salary"
           [series]="salarySeries"
+          [extras]="salaryExtras"
           [marker]="salaryMarker"
           markerLabel="You"
           [h]="250"></app-line-chart>
@@ -311,8 +346,7 @@
         subtitle="How your Total Tax increase if the Yearly income changes"
         xLabel="Total income"
         [series]="incomeSeries"
-        extraLabel="Effective tax rate"
-        [extraValues]="incomeRates"
+        [extras]="incomeExtras"
         [marker]="incomeMarker"
         markerLabel="You"
         [h]="250"></app-line-chart>

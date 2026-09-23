@@ -17,6 +17,13 @@ export interface LinePoint {
   y: number;
 }
 
+export interface ChartExtra {
+  /** name shown in the tooltip and the data-table header */
+  label: string;
+  /** pre-formatted, index-aligned with the first series' points */
+  values: string[];
+}
+
 export interface LineSeries {
   name: string;
   /** css custom property carrying the series colour, e.g. 'var(--series-1)' */
@@ -102,7 +109,10 @@ interface Tick {
 
         @if (hover !== null) {
           <div class="tooltip" [style.left.%]="tipLeft" [style.transform]="tipShift">
-            <div class="tip-x">{{ xLabel }} {{ groupedNumber(series[0].points[hover].x) }}</div>
+            <div class="tip-x">
+              <span class="tip-name">{{ xLabel }}</span>
+              <span class="tip-val">{{ groupedNumber(series[0].points[hover].x) }}</span>
+            </div>
             @for (s of series; track s.name) {
               <div class="tip-row">
                 <span class="key" [style.background]="s.color"></span>
@@ -110,11 +120,13 @@ interface Tick {
                 <span class="tip-val">{{ groupedNumber(s.points[hover].y) }}</span>
               </div>
             }
-            @if (extraLabel && extraValues.length) {
-              <div class="tip-row tip-extra">
-                <span class="tip-name">{{ extraLabel }}</span>
-                <span class="tip-val">{{ extraValues[hover] }}</span>
-              </div>
+            @for (e of extras; track e.label; let first = $first) {
+              @if (e.values.length) {
+                <div class="tip-row" [class.tip-extra]="first">
+                  <span class="tip-name">{{ e.label }}</span>
+                  <span class="tip-val">{{ e.values[hover] }}</span>
+                </div>
+              }
             }
           </div>
         }
@@ -129,8 +141,10 @@ interface Tick {
               @for (s of series; track s.name) {
                 <th>{{ s.name }}</th>
               }
-              @if (extraLabel && extraValues.length) {
-                <th>{{ extraLabel }}</th>
+              @for (e of extras; track e.label) {
+                @if (e.values.length) {
+                  <th>{{ e.label }}</th>
+                }
               }
             </tr>
           </thead>
@@ -141,8 +155,10 @@ interface Tick {
                 @for (s of series; track s.name) {
                   <td>{{ groupedNumber(s.points[i].y) }}</td>
                 }
-                @if (extraLabel && extraValues.length) {
-                  <td>{{ extraValues[i] }}</td>
+                @for (e of extras; track e.label) {
+                  @if (e.values.length) {
+                    <td>{{ e.values[i] }}</td>
+                  }
                 }
               </tr>
             }
@@ -160,10 +176,8 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() xLabel = '';
   /** spoken label when the visible title is split across a control */
   @Input() ariaLabel = '';
-  /** a measure shown in the tooltip and table only - never drawn */
-  @Input() extraLabel = '';
-  /** pre-formatted, index-aligned with the first series' points */
-  @Input() extraValues: string[] = [];
+  /** measures shown in the tooltip and table only - never drawn */
+  @Input() extras: ChartExtra[] = [];
   @Input() marker: LinePoint | null = null;
   @Input() markerLabel = 'You';
   @Input() area = true;
