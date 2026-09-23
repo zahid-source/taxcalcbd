@@ -3,9 +3,12 @@
  * fetched successfully is cached and served again when the network is gone.
  */
 const CACHE = 'taxcalc-v1';
+/* on a dev server the assets are rebuilt constantly, so nothing is cached there */
+const DEV = ['localhost', '127.0.0.1'].includes(self.location.hostname);
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png'];
 
 self.addEventListener('install', event => {
+  if (DEV) return void self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())
   );
@@ -21,6 +24,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const request = event.request;
+  if (DEV) return;
   if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) return;
 
   // navigations: network first, so a new build is picked up straight away

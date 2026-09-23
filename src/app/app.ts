@@ -40,7 +40,7 @@ export class App {
   showIosHelp = false;
 
   get canInstall(): boolean {
-    return !this.installed && (this.installPrompt !== null || this.isIos);
+    return !this.installed;
   }
 
   get isIos(): boolean {
@@ -67,7 +67,7 @@ export class App {
 
   async install() {
     if (!this.installPrompt) {
-      // iOS has no install prompt - it is a menu item in Safari
+      // Safari and Firefox never raise a prompt - the browser menu does it
       this.showIosHelp = true;
       return;
     }

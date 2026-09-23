@@ -150,12 +150,12 @@
 
   @if (showIosHelp) {
     <div class="modal-backdrop" (click)="showIosHelp = false">
-      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="ios-title"
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="install-title"
                (click)="$event.stopPropagation()">
         <header class="rate-head">
           <div>
-            <h2 id="ios-title">Install on iPhone</h2>
-            <p>Safari adds it to your home screen</p>
+            <h2 id="install-title">Install the app</h2>
+            <p>It then opens from your home screen, offline too</p>
           </div>
           <button type="button" class="btn-ghost" (click)="showIosHelp = false" aria-label="Close">
             <i class="pi pi-times"></i>
@@ -163,11 +163,21 @@
         </header>
 
         <div class="modal-body">
-          <ol class="install-steps">
-            <li>Tap <b>Share</b> in the Safari toolbar.</li>
-            <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
-            <li>Tap <b>Add</b> - the calculator opens like an app, offline too.</li>
-          </ol>
+          @if (isIos) {
+            <ol class="install-steps">
+              <li>Tap <b>Share</b> in the Safari toolbar.</li>
+              <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+              <li>Tap <b>Add</b>.</li>
+            </ol>
+          } @else {
+            <ol class="install-steps">
+              <li>Open the browser menu (<b>&#8942;</b> on Android, or the icon in the address bar).</li>
+              <li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li>
+              <li>Confirm with <b>Install</b>.</li>
+            </ol>
+            <p class="rate-note">Chrome only offers this over https, so a page served over
+              plain http or a private window will not show it.</p>
+          }
         </div>
       </section>
     </div>
