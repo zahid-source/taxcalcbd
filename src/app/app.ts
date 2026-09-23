@@ -53,10 +53,10 @@ export class App {
   }
 
   @HostListener('window:beforeinstallprompt', ['$event'])
-  onBeforeInstallPrompt(event: InstallPromptEvent) {
+  onBeforeInstallPrompt(event: Event) {
     // keep the event so the button can raise the prompt later
     event.preventDefault();
-    this.installPrompt = event;
+    this.installPrompt = event as InstallPromptEvent;
   }
 
   @HostListener('window:appinstalled')
