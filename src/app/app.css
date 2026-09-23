@@ -99,6 +99,16 @@ app-ay25-26 {
   min-width: 190px;
 }
 
+.income-year {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.income-year b {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- slab rate modal ---------- */
 
 .modal-backdrop {

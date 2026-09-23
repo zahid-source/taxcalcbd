@@ -145,7 +145,7 @@ export class TaxCalculation implements OnInit, OnDestroy {
   private static readonly CALC_INPUT_CARDS: Record<string, { icon: string; hint: string }> = {
     MONTHLY_SALARY: {icon: 'pi-wallet', hint: 'Salary per month, with yearly bonus'},
     TOTAL_INCOME: {icon: 'pi-calendar', hint: 'Whole year, salary and bonus together'},
-    ONLY_SLAB: {icon: 'pi-percentage', hint: 'Income already after exemption'}
+    ONLY_SLAB: {icon: 'pi-chart-bar', hint: 'Income already after exemption'}
   };
 
   get calcInputCards(): { value: string; label: string; icon: string; hint: string }[] {
