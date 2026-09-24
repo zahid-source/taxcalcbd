@@ -255,6 +255,7 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private x0 = 0;
   private x1 = 1;
+  private y0 = 0;
   private y1 = 1;
   private ro?: ResizeObserver;
   private readonly zone = inject(NgZone);
@@ -495,9 +496,16 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     // the y axis follows what the zoom window actually shows
     const inView = all.filter(p => p.x >= this.x0 && p.x <= this.x1);
-    const yMax = Math.max(...(inView.length ? inView : all).map(p => p.y), 1);
+    const inWindow = inView.length ? inView : all;
+    const yMax = Math.max(...inWindow.map(p => p.y));
+    // zoomed in, the axis follows the window instead of always starting at zero
+    const yMin = this.zoom ? Math.min(...inWindow.map(p => p.y)) : 0;
+    const span = yMax - yMin;
+    const lo = this.zoom && span > 0 ? yMin - span * 0.08 : 0;
+    const hi = Math.max(yMax + (this.zoom && span > 0 ? span * 0.08 : 0), lo + 1);
 
-    const yt = niceTicks(0, yMax, 4);
+    const yt = niceTicks(lo, hi, 4);
+    this.y0 = yt[0];
     this.y1 = yt[yt.length - 1];
     this.yTicks = yt.map(v => ({v, pos: this.yOf(v), label: this.tickY(v)}));
 
@@ -554,7 +562,8 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private yOf(v: number): number {
-    return this.padT + this.plotH - (v / (this.y1 || 1)) * this.plotH;
+    const span = this.y1 - this.y0 || 1;
+    return this.padT + this.plotH - ((v - this.y0) / span) * this.plotH;
   }
 }
 
