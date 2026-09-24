@@ -55,14 +55,20 @@ interface Tick {
         @if (series.length > 1) {
           <ul class="legend">
             @for (s of series; track s.name) {
-              <li><span class="key key-line" [style.background]="s.color"></span>{{ s.name }}</li>
+              <li>
+                <button type="button" class="legend-btn" [class.is-off]="isHidden(s.name)"
+                        [attr.aria-pressed]="!isHidden(s.name)"
+                        (click)="toggle(s.name)">
+                  <span class="key key-line" [style.background]="s.color"></span>{{ s.name }}
+                </button>
+              </li>
             }
           </ul>
         }
       </figcaption>
 
       <div class="plot-wrap">
-        <svg [attr.viewBox]="'0 0 ' + w + ' ' + h" [attr.height]="h" width="100%"
+        <svg [attr.viewBox]="'0 0 ' + w + ' ' + viewH" [attr.height]="viewH" width="100%"
              role="img" [attr.aria-label]="ariaLabel || title"
              (pointermove)="onMove($event)" (pointerleave)="hover = null">
 
@@ -79,7 +85,7 @@ interface Tick {
           }
 
           @for (p of paths; track p.name) {
-            @if (area && series.length === 1) {
+            @if (area && shownCount === 1) {
               <path [attr.d]="p.area" [attr.fill]="p.color" fill-opacity="0.1"></path>
             }
             <path [attr.d]="p.line" fill="none" [attr.stroke]="p.color" stroke-width="2"
@@ -111,9 +117,9 @@ interface Tick {
           <div class="tooltip" [style.left.%]="tipLeft" [style.transform]="tipShift">
             <div class="tip-x">
               <span class="tip-name">{{ xLabel }}</span>
-              <span class="tip-val">{{ groupedNumber(series[0].points[hover].x) }}</span>
+              <span class="tip-val">{{ groupedNumber(visibleSeries[0].points[hover].x) }}</span>
             </div>
-            @for (s of series; track s.name) {
+            @for (s of visibleSeries; track s.name) {
               <div class="tip-row">
                 <span class="key" [style.background]="s.color"></span>
                 <span class="tip-name">{{ s.name }}</span>
@@ -132,13 +138,23 @@ interface Tick {
         }
       </div>
 
+      <div class="resize-grip" title="Drag to resize, double click to reset"
+           role="separator" aria-label="Chart height"
+           (pointerdown)="startResize($event)"
+           (pointermove)="onResize($event)"
+           (pointerup)="endResize($event)"
+           (pointercancel)="endResize($event)"
+           (dblclick)="resetHeight()">
+        <span class="grip-bar"></span>
+      </div>
+
       <details class="data-table">
         <summary>Data table</summary>
         <table>
           <thead>
             <tr>
               <th>{{ xLabel || 'x' }}</th>
-              @for (s of series; track s.name) {
+              @for (s of visibleSeries; track s.name) {
                 <th>{{ s.name }}</th>
               }
               @for (e of extras; track e.label) {
@@ -149,10 +165,10 @@ interface Tick {
             </tr>
           </thead>
           <tbody>
-            @for (p of series[0].points; track $index; let i = $index) {
+            @for (p of visibleSeries[0].points; track $index; let i = $index) {
               <tr>
                 <td>{{ groupedNumber(p.x) }}</td>
-                @for (s of series; track s.name) {
+                @for (s of visibleSeries; track s.name) {
                   <td>{{ fmtY(s.points[i].y) }}</td>
                 }
                 @for (e of extras; track e.label) {
@@ -181,9 +197,13 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() marker: LinePoint | null = null;
   @Input() markerLabel = 'You';
   @Input() area = true;
-  @Input() h = 250;
+  @Input() h = 280;
+  /** drawn height - the reader can drag the grip to change it */
+  viewH = 280;
   /** how y values read: money uses digit grouping, percent adds a % suffix */
   @Input() yFormat: 'money' | 'percent' = 'money';
+  /** name of the one series shown until the reader turns others on from the legend */
+  @Input() soloSeries = '';
 
   @ViewChild('host') host!: ElementRef<HTMLElement>;
 
@@ -199,6 +219,10 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   markerPos: { x: number; top: number; labelX: number; anchor: string;
     dots: { y: number; color: string }[] } | null = null;
   hover: number | null = null;
+  /** series names the reader has switched off from the legend */
+  private hiddenNames = new Set<string>();
+  private appliedSolo: string | null = null;
+  private resizeFrom: { y: number; h: number } | null = null;
 
   private x0 = 0;
   private x1 = 1;
@@ -208,6 +232,10 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
 
   groupedNumber = groupedNumber;
+
+  get shownCount(): number {
+    return this.visibleSeries.length;
+  }
 
   /** y value as the tooltip and the data table show it */
   fmtY(value: number): string {
@@ -219,16 +247,39 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     return this.yFormat === 'percent' ? trimPercent(value) : compactMoney(value);
   }
 
+  /** the series actually drawn - the legend can switch any of them off */
+  get visibleSeries(): LineSeries[] {
+    const shown = this.series.filter(s => !this.hiddenNames.has(s.name));
+    return shown.length ? shown : this.series;
+  }
+
+  isHidden(name: string): boolean {
+    return this.hiddenNames.has(name) && this.visibleSeries.length !== this.series.length;
+  }
+
+  /** the last visible line stays on - an empty chart tells the reader nothing */
+  toggle(name: string): void {
+    if (this.hiddenNames.has(name)) {
+      this.hiddenNames.delete(name);
+    } else if (this.series.filter(s => !this.hiddenNames.has(s.name)).length > 1) {
+      this.hiddenNames.add(name);
+    } else {
+      return;
+    }
+    this.hover = null;
+    this.layout();
+  }
+
   get plotW(): number {
     return this.w - this.padL - this.padR;
   }
 
   get plotH(): number {
-    return this.h - this.padT - this.padB;
+    return this.viewH - this.padT - this.padB;
   }
 
   get hoverX(): number {
-    return this.hover === null ? 0 : this.xOf(this.series[0].points[this.hover].x);
+    return this.hover === null ? 0 : this.xOf(this.visibleSeries[0].points[this.hover].x);
   }
 
   get tipLeft(): number {
@@ -264,6 +315,16 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(): void {
+    // a height the reader set by hand outlives a data change
+    if (this.resizeFrom === null && !this.heightTouched) {
+      this.viewH = this.h;
+    }
+    if (this.soloSeries && this.soloSeries !== this.appliedSolo) {
+      this.appliedSolo = this.soloSeries;
+      this.hiddenNames = new Set(
+        this.series.map(s => s.name).filter(name => name !== this.soloSeries)
+      );
+    }
     this.hover = null;
     this.layout();
   }
@@ -272,8 +333,38 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.ro?.disconnect();
   }
 
+  /* height grip ------------------------------------------------ */
+
+  private heightTouched = false;
+
+  startResize(event: PointerEvent): void {
+    event.preventDefault();
+    (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    this.resizeFrom = {y: event.clientY, h: this.viewH};
+  }
+
+  onResize(event: PointerEvent): void {
+    if (!this.resizeFrom) return;
+    const next = this.resizeFrom.h + (event.clientY - this.resizeFrom.y);
+    this.viewH = Math.round(Math.max(160, Math.min(900, next)));
+    this.heightTouched = true;
+    this.layout();
+  }
+
+  endResize(event: PointerEvent): void {
+    if (!this.resizeFrom) return;
+    (event.target as HTMLElement).releasePointerCapture(event.pointerId);
+    this.resizeFrom = null;
+  }
+
+  resetHeight(): void {
+    this.heightTouched = false;
+    this.viewH = this.h;
+    this.layout();
+  }
+
   onMove(event: PointerEvent): void {
-    const points = this.series[0]?.points;
+    const points = this.visibleSeries[0]?.points;
     if (!points || points.length < 2) return;
     const target = event.currentTarget as SVGSVGElement;
     const rect = target.getBoundingClientRect();
@@ -283,8 +374,9 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.hover = Math.max(0, Math.min(points.length - 1, i));
   }
 
-  private layout(): void {
-    const all = this.series.flatMap(s => s.points);
+  layout(): void {
+    const shown = this.visibleSeries;
+    const all = shown.flatMap(s => s.points);
     if (!all.length) {
       this.paths = [];
       this.yTicks = [];
@@ -306,7 +398,7 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
       .filter(v => v >= this.x0 - 1e-9 && v <= this.x1 + 1e-9);
     this.xTicks = xt.map(v => ({v, pos: this.xOf(v), label: compactMoney(v)}));
 
-    this.paths = this.series.map(s => {
+    this.paths = shown.map(s => {
       const dots = s.points.map(p => this.yOf(p.y));
       const line = s.points
         .map((p, i) => (i === 0 ? 'M' : 'L') + this.xOf(p.x) + ' ' + this.yOf(p.y))
@@ -326,7 +418,7 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
       const ratio = (mx - this.padL) / Math.max(1, this.plotW);
 
       // every series carries the exact point, so each line gets its own dot
-      const dots = this.series
+      const dots = shown
         .map(s => {
           const hit = s.points.find(p => p.x === markerX);
           return hit ? {y: this.yOf(hit.y), color: s.color} : null;
@@ -334,7 +426,7 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
         .filter((d): d is { y: number; color: string } => d !== null);
 
       if (!dots.length) {
-        dots.push({y: this.yOf(this.marker.y), color: this.series[0].color});
+        dots.push({y: this.yOf(this.marker.y), color: shown[0].color});
       }
 
       this.markerPos = {

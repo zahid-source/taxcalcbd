@@ -5,7 +5,7 @@ import {TaxCalcService} from '../../services/tax-calc-service';
 
 import {AY_VALUE, SlabRow, TaxAnalytics, TaxInput, TaxModel, TaxResult} from '../../models/model';
 import {TAX_MODEL_25_26} from '../../models/ay25-26.model';
-import {taxModelOf} from '../../models/tax-model-registry';
+import {ayModelGroups, taxModelOf} from '../../models/tax-model-registry';
 import {ChartExtra, LineChartComponent, LinePoint, LineSeries} from '../charts/line-chart.component';
 import {StatTileComponent} from '../stat-tile/stat-tile.component';
 import {SelectComponent} from '../ui/select.component';
@@ -61,6 +61,9 @@ export class TaxCalculation implements OnInit, OnDestroy {
   rateMarker: LinePoint | null = null;
   /** tax payable at each curve point - tooltip only */
   rateExtras: ChartExtra[] = [];
+  /** slab tax against yearly income, one line per assessment year rule set */
+  aySeries: LineSeries[] = [];
+  ayMarker: LinePoint | null = null;
 
 
   /** true while a number field holds focus - drives the mobile "Done" button */
@@ -124,6 +127,7 @@ export class TaxCalculation implements OnInit, OnDestroy {
   private initializeFromModel() {
     // Load the correct model based on AY
     this.taxModel = taxModelOf(this.ay);
+    this.currentAyLabel = ayModelGroups().find(g => g.ays.includes(this.ay))?.label ?? '';
   }
 
   /* ---------------------------------------------------------------
@@ -281,24 +285,27 @@ export class TaxCalculation implements OnInit, OnDestroy {
 
     if (this.showMonthlyCharts) {
       const bonusRatio = this.monthlySalary > 0 ? this.festivalBonus / this.monthlySalary : 0;
-      const curve = TaxCalcService.buildSalaryCurve(input, this.monthlySalary, bonusRatio, 500);
-      const points = this.withCurrentPoint(curve.map(p => ({x: p.x, y: p.y})),
-        this.monthlySalary, this.taxResult.monthlyTDS);
-      this.salarySeries = [{
-        name: 'Monthly TDS',
-        color: 'var(--series-2)',
-        points
+      const salaries = this.salaryGrid();
+
+      this.salarySeries = ayModelGroups().map((group, i) => ({
+        name: group.label,
+        color: 'var(--series-' + ((i % 6) + 1) + ')',
+        points: salaries.map(salary => ({
+          x: salary,
+          y: Math.round(
+            TaxCalcService.calculateTax(
+              this.inputForModel(group.model, salary * 12 + salary * bonusRatio)
+            ).taxAfterRebate / 12
+          )
+        }))
+      }));
+
+      const current = this.salarySeries
+        .find(s => s.name === this.currentAyLabel) ?? this.salarySeries[0];
+      this.salaryExtras = [{
+        label: 'TDS rate (' + current.name + ')',
+        values: current.points.map(p => this.percent(p.x > 0 ? (p.y / p.x) * 100 : 0) + '%')
       }];
-      this.salaryExtras = [
-        {
-          label: 'Salary after TDS',
-          values: points.map(p => groupedNumber(Math.max(0, p.x - p.y)))
-        },
-        {
-          label: 'TDS rate',
-          values: points.map(p => this.percent(p.x > 0 ? (p.y / p.x) * 100 : 0) + '%')
-        }
-      ];
       this.salaryMarker = {x: this.monthlySalary, y: this.taxResult.monthlyTDS};
     } else {
       this.salarySeries = [];
@@ -368,14 +375,81 @@ export class TaxCalculation implements OnInit, OnDestroy {
       }
     ];
     this.rateMarker = {x: input.totalIncome, y: this.analytics.effectiveRate};
+
+    this.buildAyChart(input, rows.map(r => r.x));
   }
 
-  /** Makes sure the drawn curve passes exactly through the user's own figures. */
-  private withCurrentPoint(curve: LinePoint[], x: number, y: number): LinePoint[] {
-    const points: LinePoint[] = [...curve, {x, y}];
-    points.sort((a, b) => a.x - b.x);
-    return points;
+  /**
+   * Slab tax across every assessment year, on the same income scale - each year
+   * runs on its own rule set, with the user's exemption category and child
+   * allowance carried over.
+   */
+  private buildAyChart(input: TaxInput, xs: number[]) {
+    // a lighter grid: four curves over the full 500 points is needless work
+    const grid = xs.filter((_, i) => i % 4 === 0);
+    if (!grid.includes(input.totalIncome)) {
+      grid.push(input.totalIncome);
+      grid.sort((a, b) => a - b);
+    }
+
+    this.aySeries = ayModelGroups().map((group, i) => ({
+      name: group.label,
+      color: 'var(--series-' + ((i % 6) + 1) + ')',
+      points: grid.map(x => ({
+        x,
+        y: TaxCalcService.calculateTax(this.inputForModel(group.model, x)).totalTax
+      }))
+    }));
+
+    this.ayMarker = {x: input.totalIncome, y: this.taxResult.totalTax};
   }
+
+  /** The current inputs restated against another year's rule set. */
+  private inputForModel(model: TaxModel, totalIncome: number): TaxInput {
+    // the same row of the tax free limit list - male, female/65+, and so on
+    const pick = this.taxModel.TAX_FREE_LIMIT_OPTIONS
+      .findIndex(o => Number(o.value) === Number(this.taxModel.taxFreeLimit));
+    const limits = model.TAX_FREE_LIMIT_OPTIONS;
+    const limit = Number((limits[pick >= 0 ? pick : 0] ?? limits[0]).value);
+
+    const minTaxMatch = model.MIN_TAX_OPTIONS
+      .some(o => Number(o.value) === Number(this.taxModel.minTax));
+
+    return {
+      totalIncome,
+      taxFreeLimit: limit
+        + Number(this.taxModel.disabledChildren || 0) * Number(model.DISABLED_CHILD_ALLOWANCE),
+      minTax: minTaxMatch ? Number(this.taxModel.minTax) : Number(model.minTax),
+      slabs: model.SLAB,
+      // the slab calculator feeds income that is already net of exemption
+      exemptionRate: this.exemptionApplied ? model.EXEMPTION_RATE : 0,
+      maxExemption: model.MAX_EXEMPTION,
+      rebateRateOnTaxableIncome: model.REBATE_RATE_ON_TAXABLE_INCOME,
+      rebateRateOnActualInvestment: model.REBATE_RATE_ON_ACTUAL_INVESTMENT,
+      maxRebate: model.MAX_REBATE
+    };
+  }
+
+  /** Monthly salary steps the TDS lines are drawn over, the user's own included. */
+  private salaryGrid(): number[] {
+    const max = Math.max(
+      Math.min(this.monthlySalary * 2, this.monthlySalary + 200000),
+      90000
+    );
+    const steps = 250;
+    const grid: number[] = [];
+    for (let i = 0; i <= steps; i++) {
+      grid.push(Math.round((max * i) / steps));
+    }
+    if (!grid.includes(this.monthlySalary)) {
+      grid.push(this.monthlySalary);
+      grid.sort((a, b) => a - b);
+    }
+    return grid;
+  }
+
+  /** legend name of the assessment year currently selected */
+  currentAyLabel = '';
 
   /* ---------------------------------------------------------------
    * Formatting helpers

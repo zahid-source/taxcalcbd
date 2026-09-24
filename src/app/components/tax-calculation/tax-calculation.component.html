@@ -345,13 +345,14 @@
       <section class="card">
         <app-line-chart
           title="Monthly Salary vs TDS"
-          subtitle="How your TDS increase if the salary changes"
+          subtitle="How your TDS increase if the salary changes - add an assessment year from the legend"
           xLabel="Monthly salary"
           [series]="salarySeries"
+          [soloSeries]="currentAyLabel"
           [extras]="salaryExtras"
           [marker]="salaryMarker"
           markerLabel="You"
-          [h]="250"></app-line-chart>
+          [h]="280"></app-line-chart>
       </section>
     }
 
@@ -364,7 +365,7 @@
         [extras]="incomeExtras"
         [marker]="incomeMarker"
         markerLabel="You"
-        [h]="250"></app-line-chart>
+        [h]="280"></app-line-chart>
     </section>
 
     <section class="card">
@@ -377,7 +378,18 @@
         [extras]="rateExtras"
         [marker]="rateMarker"
         markerLabel="You"
-        [h]="250"></app-line-chart>
+        [h]="280"></app-line-chart>
+    </section>
+
+    <section class="card">
+      <app-line-chart
+        title="Yearly Income vs Slab Tax by Assessment Year"
+        subtitle="The same income under each assessment year's slabs, before rebate"
+        xLabel="Total income"
+        [series]="aySeries"
+        [marker]="ayMarker"
+        markerLabel="You"
+        [h]="280"></app-line-chart>
     </section>
   </div>
 }

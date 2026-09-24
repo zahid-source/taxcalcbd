@@ -26,6 +26,9 @@
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1f9e8a;
+  --series-4: #8256d0;
+  --series-5: #a8761a;
+  --series-6: #c2407a;
 
   --accent: #2a78d6;
   --accent-solid: #256abf;
@@ -78,6 +81,9 @@
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #35bda6;
+    --series-4: #a481e3;
+    --series-5: #d9a441;
+    --series-6: #e06fa0;
 
     --accent: #3987e5;
     --accent-solid: #2a78d6;
@@ -130,6 +136,9 @@
   --series-1: #3987e5;
   --series-2: #d95926;
   --series-3: #35bda6;
+  --series-4: #a481e3;
+  --series-5: #d9a441;
+  --series-6: #e06fa0;
 
   --accent: #3987e5;
   --accent-solid: #2a78d6;
@@ -445,6 +454,9 @@ input.p-inputtext:focus {
     --series-1: #256abf;
     --series-2: #c94f21;
     --series-3: #0f7e6c;
+    --series-4: #6b3fbd;
+    --series-5: #8a5f12;
+    --series-6: #a32d63;
     --accent-wash: #f4f8fe;
     --slab-free: #cccccc;
     --slab-1: #a9c9f2;

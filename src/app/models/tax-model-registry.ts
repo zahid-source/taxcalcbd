@@ -22,3 +22,34 @@ export function taxModelOf(ay: AY_VALUE): TaxModel {
   if (!model) throw new Error('Unsupported AY: ' + ay);
   return model;
 }
+
+export interface AyModelGroup {
+  /** short legend label, e.g. 'AY 26-27, 27-28' */
+  label: string;
+  ays: AY_VALUE[];
+  model: TaxModel;
+}
+
+/** Assessment years bundled by the rule set they share, in calendar order. */
+export function ayModelGroups(): AyModelGroup[] {
+  const groups: AyModelGroup[] = [];
+  for (const ay of Object.values(AY)) {
+    const model = TAX_MODELS[ay];
+    const last = groups[groups.length - 1];
+    if (last && last.model === model) {
+      last.ays.push(ay);
+    } else {
+      groups.push({label: '', ays: [ay], model});
+    }
+  }
+  for (const group of groups) {
+    group.label = 'AY ' + group.ays.map(ay => shortAy(ay)).join(', ');
+  }
+  return groups;
+}
+
+/** '2026-2027' -> '26-27' */
+function shortAy(ay: AY_VALUE): string {
+  const [from, to] = String(ay).split('-');
+  return from.slice(2) + '-' + to.slice(2);
+}
