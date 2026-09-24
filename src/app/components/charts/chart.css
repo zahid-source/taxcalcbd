@@ -117,8 +117,10 @@ svg {
 }
 
 .tooltip {
+  /* sits above the plot so it never covers the curve */
   position: absolute;
-  top: 2px;
+  bottom: calc(100% + 8px);
+  left: 0;
   pointer-events: none;
   z-index: 3;
   min-width: 210px;

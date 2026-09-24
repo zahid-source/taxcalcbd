@@ -132,6 +132,13 @@ export class TaxCalcService {
     };
   }
 
+  /** The top slab rate the income actually reaches. */
+  static marginalRateOf(result: TaxResult): number {
+    return result.slabBreakDown
+      .filter(s => s.amount > 0)
+      .reduce((max, s) => Math.max(max, s.rate), 0);
+  }
+
   /** Yearly tax payable as total income varies, all other settings held fixed. */
   static buildIncomeCurve(base: TaxInput, steps: number = 40): CurvePoint[] {
     let max = Math.min(base.totalIncome * 2, base.totalIncome + 2000000);
@@ -144,7 +151,8 @@ export class TaxCalcService {
         x: totalIncome,
         y: result.taxAfterRebate,
         totalTax: result.totalTax,
-        rate: totalIncome > 0 ? (result.taxAfterRebate / totalIncome) * 100 : 0
+        rate: totalIncome > 0 ? (result.taxAfterRebate / totalIncome) * 100 : 0,
+        marginalRate: this.marginalRateOf(result)
       });
     }
     return points;
@@ -163,7 +171,8 @@ export class TaxCalcService {
         x: salary,
         y: Math.round(result.taxAfterRebate / 12),
         totalTax: Math.round(result.totalTax / 12),
-        rate: annual > 0 ? (result.taxAfterRebate / annual) * 100 : 0
+        rate: annual > 0 ? (result.taxAfterRebate / annual) * 100 : 0,
+        marginalRate: this.marginalRateOf(result)
       });
     }
     return points;

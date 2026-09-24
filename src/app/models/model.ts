@@ -156,6 +156,8 @@ export interface CurvePoint {
   totalTax: number;
   /** effective rate at this point, % */
   rate: number;
+  /** highest slab rate the income reaches at this point, % */
+  marginalRate: number;
 }
 
 /** One slab line as the breakdown view renders it. */

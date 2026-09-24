@@ -78,13 +78,15 @@
         <div class="hero-step hero-side">
           <span class="hero-step-label">Monthly TDS</span>
           <span class="hero-step-value">Tk {{ formatIndianNumber(taxResult.monthlyTDS) }}</span>
+<!--          @if (analytics.minTaxApplied) {-->
+<!--            <p class="hero-note"><span class="chip chip&#45;&#45;warn">Minimum tax applied</span></p>-->
+<!--          }-->
         </div>
+
       }
     </div>
 
-    @if (analytics.minTaxApplied) {
-      <p class="hero-note"><span class="chip chip--warn">Minimum tax floor applied</span></p>
-    }
+
   </section>
 
   <div class="tabs" role="tablist" aria-label="Results view">
@@ -361,6 +363,19 @@
         [series]="incomeSeries"
         [extras]="incomeExtras"
         [marker]="incomeMarker"
+        markerLabel="You"
+        [h]="250"></app-line-chart>
+    </section>
+
+    <section class="card">
+      <app-line-chart
+        title="Yearly Income vs Tax Rate"
+        subtitle="Slab rate you reach, slab tax rate, and the rate you actually pay"
+        xLabel="Total income"
+        yFormat="percent"
+        [series]="rateSeries"
+        [extras]="rateExtras"
+        [marker]="rateMarker"
         markerLabel="You"
         [h]="250"></app-line-chart>
     </section>

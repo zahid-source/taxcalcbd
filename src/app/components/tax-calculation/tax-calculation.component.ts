@@ -56,6 +56,11 @@ export class TaxCalculation implements OnInit, OnDestroy {
   incomeMarker: LinePoint | null = null;
   /** effective rate at each curve point - tooltip only, never drawn */
   incomeExtras: ChartExtra[] = [];
+  /** marginal slab rate and effective rate against yearly income */
+  rateSeries: LineSeries[] = [];
+  rateMarker: LinePoint | null = null;
+  /** tax payable at each curve point - tooltip only */
+  rateExtras: ChartExtra[] = [];
 
 
   /** true while a number field holds focus - drives the mobile "Done" button */
@@ -303,13 +308,17 @@ export class TaxCalculation implements OnInit, OnDestroy {
 
     // one row set keeps both lines and the rate column index-aligned
     const rows = TaxCalcService.buildIncomeCurve(input, 500)
-      .map(p => ({x: p.x, afterRebate: p.y, totalTax: p.totalTax, rate: p.rate}));
+      .map(p => ({
+        x: p.x, afterRebate: p.y, totalTax: p.totalTax,
+        rate: p.rate, marginalRate: p.marginalRate
+      }));
 
     rows.push({
       x: input.totalIncome,
       afterRebate: this.taxResult.taxAfterRebate,
       totalTax: this.taxResult.totalTax,
-      rate: this.analytics.effectiveRate
+      rate: this.analytics.effectiveRate,
+      marginalRate: this.analytics.marginalRate
     });
     rows.sort((a, b) => a.x - b.x);
 
@@ -330,6 +339,35 @@ export class TaxCalculation implements OnInit, OnDestroy {
       values: rows.map(r => this.percent(r.rate) + '%')
     }];
     this.incomeMarker = {x: input.totalIncome, y: this.taxResult.taxAfterRebate};
+
+    this.rateSeries = [
+      {
+        name: 'Slab rate',
+        color: 'var(--series-2)',
+        points: rows.map(r => ({x: r.x, y: r.marginalRate}))
+      },
+      {
+        name: 'Slab tax rate',
+        color: 'var(--series-3)',
+        points: rows.map(r => ({x: r.x, y: r.x > 0 ? (r.totalTax / r.x) * 100 : 0}))
+      },
+      {
+        name: 'Effective tax rate',
+        color: 'var(--series-1)',
+        points: rows.map(r => ({x: r.x, y: r.rate}))
+      }
+    ];
+    this.rateExtras = [
+      {
+        label: 'Tax payable',
+        values: rows.map(r => groupedNumber(r.totalTax))
+      },
+      {
+        label: 'Tax payable after rebate',
+        values: rows.map(r => groupedNumber(r.afterRebate))
+      }
+    ];
+    this.rateMarker = {x: input.totalIncome, y: this.analytics.effectiveRate};
   }
 
   /** Makes sure the drawn curve passes exactly through the user's own figures. */

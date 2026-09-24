@@ -117,7 +117,7 @@ interface Tick {
               <div class="tip-row">
                 <span class="key" [style.background]="s.color"></span>
                 <span class="tip-name">{{ s.name }}</span>
-                <span class="tip-val">{{ groupedNumber(s.points[hover].y) }}</span>
+                <span class="tip-val">{{ fmtY(s.points[hover].y) }}</span>
               </div>
             }
             @for (e of extras; track e.label; let first = $first) {
@@ -153,7 +153,7 @@ interface Tick {
               <tr>
                 <td>{{ groupedNumber(p.x) }}</td>
                 @for (s of series; track s.name) {
-                  <td>{{ groupedNumber(s.points[i].y) }}</td>
+                  <td>{{ fmtY(s.points[i].y) }}</td>
                 }
                 @for (e of extras; track e.label) {
                   @if (e.values.length) {
@@ -182,6 +182,8 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() markerLabel = 'You';
   @Input() area = true;
   @Input() h = 250;
+  /** how y values read: money uses digit grouping, percent adds a % suffix */
+  @Input() yFormat: 'money' | 'percent' = 'money';
 
   @ViewChild('host') host!: ElementRef<HTMLElement>;
 
@@ -206,6 +208,16 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
 
   groupedNumber = groupedNumber;
+
+  /** y value as the tooltip and the data table show it */
+  fmtY(value: number): string {
+    return this.yFormat === 'percent' ? trimPercent(value) : groupedNumber(value);
+  }
+
+  /** y value as the axis shows it */
+  tickY(value: number): string {
+    return this.yFormat === 'percent' ? trimPercent(value) : compactMoney(value);
+  }
 
   get plotW(): number {
     return this.w - this.padL - this.padR;
@@ -288,7 +300,7 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     const yt = niceTicks(0, yMax, 4);
     this.y1 = yt[yt.length - 1];
-    this.yTicks = yt.map(v => ({v, pos: this.yOf(v), label: compactMoney(v)}));
+    this.yTicks = yt.map(v => ({v, pos: this.yOf(v), label: this.tickY(v)}));
 
     const xt = niceTicks(this.x0, this.x1, this.w < 420 ? 3 : 5)
       .filter(v => v >= this.x0 - 1e-9 && v <= this.x1 + 1e-9);
@@ -345,4 +357,10 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   private yOf(v: number): number {
     return this.padT + this.plotH - (v / (this.y1 || 1)) * this.plotH;
   }
+}
+
+/** one decimal, with the sign kept: 12.5% */
+function trimPercent(value: number): string {
+  if (!isFinite(value)) return '0.0%';
+  return (Math.round(value * 10) / 10).toFixed(1) + '%';
 }

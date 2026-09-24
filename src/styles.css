@@ -25,6 +25,7 @@
 
   --series-1: #2a78d6;
   --series-2: #eb6834;
+  --series-3: #1f9e8a;
 
   --accent: #2a78d6;
   --accent-solid: #256abf;
@@ -76,6 +77,7 @@
 
     --series-1: #3987e5;
     --series-2: #d95926;
+    --series-3: #35bda6;
 
     --accent: #3987e5;
     --accent-solid: #2a78d6;
@@ -127,6 +129,7 @@
 
   --series-1: #3987e5;
   --series-2: #d95926;
+  --series-3: #35bda6;
 
   --accent: #3987e5;
   --accent-solid: #2a78d6;
@@ -441,6 +444,7 @@ input.p-inputtext:focus {
     --border: #dddddd;
     --series-1: #256abf;
     --series-2: #c94f21;
+    --series-3: #0f7e6c;
     --accent-wash: #f4f8fe;
     --slab-free: #cccccc;
     --slab-1: #a9c9f2;
