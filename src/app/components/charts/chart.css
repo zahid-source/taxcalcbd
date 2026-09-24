@@ -3,11 +3,11 @@
 }
 
 .chart-head {
+  /* heading and legend both start at the left edge, on every width */
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px 16px;
-  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 12px;
 }
 
@@ -40,7 +40,8 @@
 .legend {
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 4px 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -105,6 +106,9 @@ svg {
   display: block;
   overflow: visible;
   touch-action: pan-y;
+  /* dragging out a zoom window must not select the axis labels */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .grid {
@@ -199,6 +203,37 @@ svg {
   margin-bottom: 4px;
   padding-bottom: 5px;
   border-bottom: 1px solid var(--border);
+}
+
+.zoom-band {
+  fill: var(--accent);
+  fill-opacity: 0.12;
+  stroke: var(--accent);
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+}
+
+.zoom-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.zoom-reset:hover {
+  background: var(--hover-wash);
+  color: var(--text-1);
+}
+
+.zoom-reset i {
+  font-size: 0.68rem;
 }
 
 .resize-grip {

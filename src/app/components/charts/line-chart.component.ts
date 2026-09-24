@@ -47,6 +47,11 @@ interface Tick {
           <div class="chart-title-row">
             <h4 class="chart-title">{{ title }}</h4>
             <ng-content select="[chart-control]"></ng-content>
+            @if (zoom) {
+              <button type="button" class="zoom-reset" (click)="resetZoom()">
+                <i class="pi pi-refresh"></i> Reset zoom
+              </button>
+            }
           </div>
           @if (subtitle) {
             <p class="chart-sub">{{ subtitle }}</p>
@@ -70,7 +75,18 @@ interface Tick {
       <div class="plot-wrap">
         <svg [attr.viewBox]="'0 0 ' + w + ' ' + viewH" [attr.height]="viewH" width="100%"
              role="img" [attr.aria-label]="ariaLabel || title"
-             (pointermove)="onMove($event)" (pointerleave)="hover = null">
+             (pointerdown)="startSelect($event)"
+             (pointermove)="onMove($event)"
+             (pointerup)="endSelect($event)"
+             (pointercancel)="cancelSelect()"
+             (pointerleave)="hover = null">
+
+        <defs>
+          <clipPath [attr.id]="clipId">
+            <rect [attr.x]="padL" [attr.y]="padT - 6"
+                  [attr.width]="plotW" [attr.height]="plotH + 6"></rect>
+          </clipPath>
+        </defs>
 
           @for (t of yTicks; track t.v) {
             <line class="grid" [attr.x1]="padL" [attr.x2]="w - padR" [attr.y1]="t.pos" [attr.y2]="t.pos"></line>
@@ -84,15 +100,22 @@ interface Tick {
             <text class="tick" [attr.x]="t.pos" [attr.y]="padT + plotH + 18" text-anchor="middle">{{ t.label }}</text>
           }
 
-          @for (p of paths; track p.name) {
-            @if (area && shownCount === 1) {
-              <path [attr.d]="p.area" [attr.fill]="p.color" fill-opacity="0.1"></path>
+          <g [attr.clip-path]="'url(#' + clipId + ')'">
+            @for (p of paths; track p.name) {
+              @if (area && shownCount === 1) {
+                <path [attr.d]="p.area" [attr.fill]="p.color" fill-opacity="0.1"></path>
+              }
+              <path [attr.d]="p.line" fill="none" [attr.stroke]="p.color" stroke-width="2"
+                    stroke-linejoin="round" stroke-linecap="round"></path>
             }
-            <path [attr.d]="p.line" fill="none" [attr.stroke]="p.color" stroke-width="2"
-                  stroke-linejoin="round" stroke-linecap="round"></path>
+          </g>
+
+          @if (selectBand) {
+            <rect class="zoom-band" [attr.x]="selectBand.x" [attr.y]="padT"
+                  [attr.width]="selectBand.w" [attr.height]="plotH"></rect>
           }
 
-          @if (markerPos) {
+          @if (markerPos && !selectBand) {
             <line class="marker-guide" [attr.x1]="markerPos.x" [attr.x2]="markerPos.x"
                   [attr.y1]="markerPos.top" [attr.y2]="padT + plotH"></line>
             @for (dot of markerPos.dots; track $index) {
@@ -103,7 +126,7 @@ interface Tick {
                   [attr.text-anchor]="markerPos.anchor">{{ markerLabel }}</text>
           }
 
-          @if (hover !== null) {
+          @if (hover !== null && !selectBand) {
             <line class="crosshair" [attr.x1]="hoverX" [attr.x2]="hoverX"
                   [attr.y1]="padT" [attr.y2]="padT + plotH"></line>
             @for (p of paths; track p.name) {
@@ -113,7 +136,7 @@ interface Tick {
           }
         </svg>
 
-        @if (hover !== null) {
+        @if (hover !== null && !selectBand) {
           <div class="tooltip" [style.left.%]="tipLeft" [style.transform]="tipShift">
             <div class="tip-x">
               <span class="tip-name">{{ xLabel }}</span>
@@ -165,9 +188,9 @@ interface Tick {
             </tr>
           </thead>
           <tbody>
-            @for (p of visibleSeries[0].points; track $index; let i = $index) {
+            @for (i of viewIndexes; track i) {
               <tr>
-                <td>{{ groupedNumber(p.x) }}</td>
+                <td>{{ groupedNumber(visibleSeries[0].points[i].x) }}</td>
                 @for (s of visibleSeries; track s.name) {
                   <td>{{ fmtY(s.points[i].y) }}</td>
                 }
@@ -223,6 +246,12 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   private hiddenNames = new Set<string>();
   private appliedSolo: string | null = null;
   private resizeFrom: { y: number; h: number } | null = null;
+  /** x range the reader dragged out, in data units */
+  zoom: { x0: number; x1: number } | null = null;
+  selectBand: { x: number; w: number } | null = null;
+  private selectFrom: number | null = null;
+  private static uid = 0;
+  readonly clipId = 'plot-clip-' + (LineChartComponent.uid += 1);
 
   private x0 = 0;
   private x1 = 1;
@@ -245,6 +274,16 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   /** y value as the axis shows it */
   tickY(value: number): string {
     return this.yFormat === 'percent' ? trimPercent(value) : compactMoney(value);
+  }
+
+  /** indexes of the points inside the current zoom window */
+  get viewIndexes(): number[] {
+    const points = this.visibleSeries[0]?.points ?? [];
+    const out: number[] = [];
+    points.forEach((p, i) => {
+      if (!this.zoom || (p.x >= this.zoom.x0 && p.x <= this.zoom.x1)) out.push(i);
+    });
+    return out;
   }
 
   /** the series actually drawn - the legend can switch any of them off */
@@ -366,12 +405,77 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   onMove(event: PointerEvent): void {
     const points = this.visibleSeries[0]?.points;
     if (!points || points.length < 2) return;
+    const px = this.pxOf(event);
+
+    if (this.selectFrom !== null) {
+      const from = Math.min(this.selectFrom, px);
+      const to = Math.max(this.selectFrom, px);
+      this.selectBand = {x: from, w: Math.max(0, to - from)};
+      this.hover = null;
+      return;
+    }
+
+    const value = this.valueAt(px);
+    let best = 0;
+    for (let i = 1; i < points.length; i++) {
+      if (Math.abs(points[i].x - value) < Math.abs(points[best].x - value)) best = i;
+    }
+    this.hover = best;
+  }
+
+  /* selection zoom --------------------------------------------- */
+
+  startSelect(event: PointerEvent): void {
+    if (event.button !== 0 && event.pointerType === 'mouse') return;
+    const px = this.pxOf(event);
+    if (px < this.padL || px > this.w - this.padR) return;
+    event.preventDefault();
+    (event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId);
+    this.selectFrom = px;
+    this.hover = null;
+  }
+
+  endSelect(event: PointerEvent): void {
+    const target = event.currentTarget as SVGSVGElement;
+    if (target.hasPointerCapture?.(event.pointerId)) {
+      target.releasePointerCapture(event.pointerId);
+    }
+    const band = this.selectBand;
+    this.selectFrom = null;
+    this.selectBand = null;
+    // a click, not a drag - leave the view alone
+    if (!band || band.w < 12) return;
+
+    const x0 = this.valueAt(band.x);
+    const x1 = this.valueAt(band.x + band.w);
+    if (x1 - x0 <= 0) return;
+    this.zoom = {x0, x1};
+    this.hover = null;
+    this.layout();
+  }
+
+  cancelSelect(): void {
+    this.selectFrom = null;
+    this.selectBand = null;
+  }
+
+  resetZoom(): void {
+    this.zoom = null;
+    this.hover = null;
+    this.layout();
+  }
+
+  /** pointer position in the svg's own coordinates */
+  private pxOf(event: PointerEvent): number {
     const target = event.currentTarget as SVGSVGElement;
     const rect = target.getBoundingClientRect();
-    const px = ((event.clientX - rect.left) / rect.width) * this.w;
+    return ((event.clientX - rect.left) / rect.width) * this.w;
+  }
+
+  /** svg x -> data x */
+  private valueAt(px: number): number {
     const t = (px - this.padL) / Math.max(1, this.plotW);
-    const i = Math.round(t * (points.length - 1));
-    this.hover = Math.max(0, Math.min(points.length - 1, i));
+    return this.x0 + Math.max(0, Math.min(1, t)) * (this.x1 - this.x0);
   }
 
   layout(): void {
@@ -386,9 +490,12 @@ export class LineChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     this.padL = this.w < 420 ? 42 : 54;
-    this.x0 = Math.min(...all.map(p => p.x));
-    this.x1 = Math.max(...all.map(p => p.x));
-    const yMax = Math.max(...all.map(p => p.y), 1);
+    this.x0 = this.zoom ? this.zoom.x0 : Math.min(...all.map(p => p.x));
+    this.x1 = this.zoom ? this.zoom.x1 : Math.max(...all.map(p => p.x));
+
+    // the y axis follows what the zoom window actually shows
+    const inView = all.filter(p => p.x >= this.x0 && p.x <= this.x1);
+    const yMax = Math.max(...(inView.length ? inView : all).map(p => p.y), 1);
 
     const yt = niceTicks(0, yMax, 4);
     this.y1 = yt[yt.length - 1];
