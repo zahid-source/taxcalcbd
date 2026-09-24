@@ -2,7 +2,7 @@
  * Minimal offline shell. The build hashes its own asset names, so anything
  * fetched successfully is cached and served again when the network is gone.
  */
-const CACHE = 'taxcalc-v1';
+const CACHE = 'taxcalc-v2';
 /* on a dev server the assets are rebuilt constantly, so nothing is cached there */
 const DEV = ['localhost', '127.0.0.1'].includes(self.location.hostname);
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png'];
