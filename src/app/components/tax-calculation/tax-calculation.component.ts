@@ -384,9 +384,9 @@ export class TaxCalculation implements OnInit, OnDestroy {
    * runs on its own rule set, with the user's exemption category and child
    * allowance carried over.
    */
-  private buildAyChart(input: TaxInput, xs: number[]) {
+  private buildAyChart(input: TaxInput, grid: number[]) {
     // a lighter grid: four curves over the full 500 points is needless work
-    const grid = xs.filter((_, i) => i % 4 === 0);
+    // const grid = xs.filter((_, i) => i % 4 === 0);
     if (!grid.includes(input.totalIncome)) {
       grid.push(input.totalIncome);
       grid.sort((a, b) => a - b);
